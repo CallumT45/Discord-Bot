@@ -1,4 +1,4 @@
-import discord, praw, random, io, asyncio, datetime, urllib, numpy, csv, json
+import discord, praw, random, io, asyncio, datetime, urllib, csv, json
 
 from urllib.request import Request, urlopen
 from PIL import Image, ImageDraw, ImageFont
@@ -227,12 +227,18 @@ async def on_message(message):
 
             
                     
-    elif message.content == '$kill' :
-        print(message.author)
-        await client.logout()#and message.member.roles.find('name', 'Admin'): 
+    elif message.content == '$kill' : await client.logout()
 
     elif message.content == '$help': 
-        output = """The functions currently available are; \n•$due for a list of outstanding assignments, \n•$meme for a random meme from r/programmerhumor,\n•$new for adding new assignments. Follow the given instructions,\n•$remove for removing assingments,\n•$tictactoe for a round of the classic game versus the computer\n•React with ❓ for sarcastic google response"""
+        output = """
+        The functions currently available are; \n
+        • $due for a list of outstanding assignments, \n
+        • $meme for a random meme from r/programmerhumor, \n
+        • $new for adding new assignments. Follow the given instructions, \n
+        • $remove for removing assingments, \n
+        • $tictactoe for a round of the classic game versus the computer \n
+        • React with ❓ for sarcastic google response
+        """
         await channel.send(output)
 
 
