@@ -319,7 +319,8 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user):
     """If reaction matches and there is text in the message then draw the text on the image, return the image"""
-    if reaction.emoji == '❓' and reaction.message.content:
+    print("\u2753")
+    if reaction.emoji == ':question:' and reaction.message.content:
         img = Image.open(r'files\Google_web_search.png')
         draw = ImageDraw.Draw(img)
 
