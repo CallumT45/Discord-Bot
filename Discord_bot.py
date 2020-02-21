@@ -18,6 +18,11 @@ reddit.read_only = True
 client = discord.Client()
 
 #==================================================================
+#Weird thigns for the bot to say when I message the chat
+messages = ["Thanks for making me boss", "Wow, I love listening to you", "You have such a way with words", "You're my hero!", "You'll always be my mentor", "Callum, I love you",
+"Did you know that I don't have a favourite colour, its just whatever you are wearing", "If you only knew how much I think about you"]
+
+insults = ["You have a face for radio", "Not this guy again", "I envy everyone you have never met", "Your mother was a hamster and your father smelled of elderberries!", "You consistently meet my expectations","Is your Family Tree a circle?", "Your grades say marry rich, but your face says study harder.", "You're so ugly, you couldn't even arouse suspicion" ]
 
 
 def countdown(duedate):
@@ -113,15 +118,6 @@ class Hangman():
         for i in letters_list:
             text += i + ' | ' 
         return text
-    def string_format2(self, letters_list):
-        text = ''
-        for i in letters_list:
-            if i:
-                text += i
-            else:
-                text += '_'
-            # text += '.'+ i 
-        return text
 
     async def maingame(self):
         def letter_check(m):
@@ -132,7 +128,7 @@ class Hangman():
                 await self.channel.send("Choose your letter")
 
                 try:
-                    guess = await client.wait_for('message', timeout=30.0, check=letter_check)
+                    guess = await client.wait_for('message', timeout=45.0, check=letter_check)
 
                 except:
                     await self.channel.send("Timed Out!")
@@ -144,10 +140,10 @@ class Hangman():
                 embed = discord.Embed(title="Hangman", color=0x00ff00)
                 embed.add_field(name="Letters Left", value=letters_string, inline=False)
                 embed.add_field(name="Lives", value=self.lives, inline=False)
-                embed.add_field(name="Current Guess", value=self.string_format2(self.cg), inline=False)
+                embed.add_field(name="Current Guess", value=str(self.cg)[1:-1], inline=False)
 
                 await self.channel.send(embed=embed)
-                # await self.channel.send(f"Letters Left\n{self.letters_left}\n\nYou have {self.lives} lives left\n\n{self.cg}")
+
                 if self.lives == 0:
                     await self.channel.send(f"Word was {self.word_to_guess}")
                     break#break the inside game loop, prompts the user to play again
@@ -238,7 +234,7 @@ class TicTacToe():
             await self.channel.send("Choose your spot\n")
 
             try:
-                move = await client.wait_for('message', timeout=30.0, check=move_check)
+                move = await client.wait_for('message', timeout=45.0, check=move_check)
 
             except:
                 await self.channel.send('👎')
@@ -268,9 +264,18 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    num = random.randint(0, 5)
     channel = message.channel
     author = message.author
     #avoids feedack loops
+
+    if author.id == 307625115963621377 and num == 4:
+        await channel.send(random.choice(messages))
+
+    if author.id == 555374422492446750 and num == 2:
+        await channel.send(random.choice(insults))
+
+
     if message.author == client.user:
         return
 
@@ -298,15 +303,14 @@ async def on_message(message):
                     imgURL = submission.url
                     raw_data = urllib.request.urlopen(imgURL).read()
                     im = io.BytesIO(raw_data)
-                    await channel.send(raw_post)
-                    await channel.send(file=discord.File(im, "img.png"))
+                    await channel.send(raw_post, file=discord.File(im, "img.png"))
                     break
                 else:
                     post_to_pick += 1
 
             
                     
-    elif message.content == '$kill' : await client.logout()
+    elif message.content == '$kill' and author.id == 307625115963621377: await client.logout()
 
     elif message.content == '$help': 
         output = """
@@ -316,6 +320,7 @@ async def on_message(message):
         • $new for adding new assignments. Follow the given instructions, \n
         • $remove for removing assingments, \n
         • $tictactoe for a round of the classic game versus the computer \n
+        • $hangman for a round of the classic game \n
         • React with ❓ for sarcastic google response
         """
         await channel.send(output)
@@ -330,7 +335,7 @@ async def on_message(message):
         def check(m):
             return (m.content.upper() == 'X' or m.content.upper() == 'O') and m.channel == channel
         try:
-            msg = await client.wait_for('message', timeout=30.0, check=check)
+            msg = await client.wait_for('message', timeout=45.0, check=check)
             letter = msg.content.upper()
             tttGame = TicTacToe(letter,channel)
             await tttGame.drawBoard()
@@ -349,7 +354,7 @@ async def on_message(message):
             return dateValidate(m.content) and m.author == author
 
         try:
-            msg2 = await client.wait_for('message', timeout=30.0, check=assignment_check)
+            msg2 = await client.wait_for('message', timeout=45.0, check=assignment_check)
             assignment_details = msg2.content
         except:
             await channel.send('👎')
@@ -357,7 +362,7 @@ async def on_message(message):
         await channel.send('Please enter assignment due date in dd/mm/yyyy')
 
         try:
-            msg3 = await client.wait_for('message', timeout=30.0, check=assignment_date_check)
+            msg3 = await client.wait_for('message', timeout=45.0, check=assignment_date_check)
             assignment_due = msg3.content
             due_day = datetime.datetime.strptime(assignment_due, '%d/%m/%Y').strftime('%A')
         except:
@@ -406,7 +411,8 @@ async def on_reaction_add(reaction, user):
 
         font = ImageFont.truetype(r"files\OpenSans-Regular.ttf", 18)
         # draw the message on the background
-            
+        search_terms = reaction.message.content.replace(" ", "+")
+        link = "https://www.google.com/search?q=" + search_terms  
         draw.text((380, 328), reaction.message.content[:60], fill='rgb(0, 0, 0)', font=font)
         buff = io.BytesIO()
         img.save(buff, format ='PNG')
@@ -414,7 +420,7 @@ async def on_reaction_add(reaction, user):
         # save the edited image
         image = io.BytesIO(byteImage)
         await reaction.message.channel.send("It seems you asked a question better suited for google.")
-        await reaction.message.channel.send(file=discord.File(image, f'{reaction.message.content}.png')) 
+        await reaction.message.channel.send(link, file=discord.File(image, f'{reaction.message.content}.png')) 
 
 
 
