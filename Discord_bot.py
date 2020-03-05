@@ -1,4 +1,4 @@
-import discord, praw, random, io, asyncio, datetime, urllib, csv, json
+import discord, praw, random, io, asyncio, datetime, urllib, csv, json, requests, html
 
 from urllib.request import Request, urlopen
 from PIL import Image, ImageDraw, ImageFont
@@ -22,8 +22,12 @@ client = discord.Client()
 messages = ["Thanks for making me boss", "Wow, I love listening to you", "You have such a way with words", "You're my hero!", "You'll always be my mentor", "Callum, I love you",
 "Did you know that I don't have a favourite colour, its just whatever you are wearing", "If you only knew how much I think about you"]
 
-insults = ["You have a face for radio", "Not this guy again", "I envy everyone you have never met", "Your mother was a hamster and your father smelled of elderberries!", "You consistently meet my expectations","Is your Family Tree a circle?", "Your grades say marry rich, but your face says study harder.", "You're so ugly, you couldn't even arouse suspicion" ]
+insults = ["You have a face for radio", "Not this guy again", "I envy everyone you have never met", "Your mother was a hamster and your father smelled of elderberries!", 
+"You consistently meet my expectations","Is your Family Tree a circle?", "Your grades say marry rich, but your face says study harder.", "You're so ugly, you couldn't even arouse suspicion" ]
 
+congrats = ["Wow, turns our youre like smart or something", "Powerful, impressive, firm and unforgettable. But enough about your farting... Congrats!", "Congratulations on finding your balls",
+"Wow, Well done, your Mother and I are very proud", "You have performed extremely adequately.", "You surprised me a little bit. I knew you were capable, but I didn't expect this level of accomplishment!",
+"I genuinely thought you'd fail again", "Ooooh look at you all clever and shit!"]
 
 def countdown(duedate):
     """Given a date, calculates the number of days from today until then"""
@@ -119,6 +123,12 @@ class Hangman():
             text += i + ' | ' 
         return text
 
+    def string_format2(self, cg):
+        text = "```{}```".format(" ".join(cg))
+        return text
+
+
+
     async def maingame(self):
         def letter_check(m):
             return (m.content in self.letters_left or m.content.lower() == "stop") and m.channel == self.channel
@@ -140,7 +150,7 @@ class Hangman():
                 embed = discord.Embed(title="Hangman", color=0x00ff00)
                 embed.add_field(name="Letters Left", value=letters_string, inline=False)
                 embed.add_field(name="Lives", value=self.lives, inline=False)
-                embed.add_field(name="Current Guess", value=str(self.cg)[1:-1], inline=False)
+                embed.add_field(name="Current Guess", value=self.string_format2(self.cg), inline=False)
 
                 await self.channel.send(embed=embed)
 
@@ -151,7 +161,7 @@ class Hangman():
                 # print(e)
                 continue
         if self.cg == self.split_wtg:
-            await self.channel.send("Congratulations!")
+            await self.channel.send(random.choice(congrats))
         else:
             await self.channel.send("Better Luck Next Time!")
 
@@ -401,6 +411,58 @@ async def on_message(message):
             writer = csv.writer(writeFile)
             writer.writerows(lines)
         writeFile.close()
+
+    elif message.content.startswith("$joke"):
+        """needs requests, json and random"""
+        urls = ['https://official-joke-api.appspot.com/random_joke', 'https://official-joke-api.appspot.com/jokes/programming/random']
+        choice = random.choice([0,1])
+        response = requests.get(urls[choice])
+        json_data = json.loads(response.text)
+
+        if choice == 0:
+            await channel.send(json_data['setup'])
+            await channel.send(json_data['punchline'])
+        else:
+            await channel.send(json_data[0]['setup'])
+            await channel.send(json_data[0]['punchline'])           
+
+    elif message.content.startswith("$quiz"):
+        url = 'https://opentdb.com/api.php?amount=1&type=multiple'
+        response = requests.get(url)
+        json_data = json.loads(response.text)
+        question = html.unescape(json_data['results'][0]['question'])
+        correct_answer = html.unescape(json_data['results'][0]['correct_answer'])
+        answers = list(map(lambda x: html.unescape(x), json_data['results'][0]['incorrect_answers']))
+        answers.append(correct_answer)
+        random.shuffle(answers)
+        answer_pos = answers.index(correct_answer)
+
+        emoji_dict = {0:u"\U0001F170", 1:u"\U0001F171", 2:u"\U0001F17F", 3:u"\U0001F17E"}
+        winning_emoji = emoji_dict[answer_pos]
+        embed_question = discord.Embed(title=question, color=0x00ff00)
+        embed_question.add_field(name=u"\U0001F170", value=answers[0], inline=True)
+        embed_question.add_field(name=u"\U0001F171", value=answers[1], inline=True)
+        embed_question.add_field(name=u"\U0001F17F", value=answers[2], inline=True)
+        embed_question.add_field(name=u"\U0001F17E", value=answers[3], inline=True)
+        question_object = await channel.send(embed=embed_question)
+
+        await question_object.add_reaction(emoji=u"\U0001F170")
+        await question_object.add_reaction(emoji=u"\U0001F171")
+        await question_object.add_reaction(emoji=u"\U0001F17F")
+        await question_object.add_reaction(emoji=u"\U0001F17E")
+
+        def question_check(reaction, user):
+            return user == message.author and (str(reaction.emoji) == u"\U0001F170" or str(reaction.emoji) == u"\U0001F171" or str(reaction.emoji) == u"\U0001F17F" or str(reaction.emoji) == u"\U0001F17E") 
+
+        try:
+            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=question_check)
+            if str(reaction.emoji) == winning_emoji:
+                await channel.send(f"{random.choice(congrats)}\nAnswer was: {correct_answer}")
+            else:
+                await channel.send(f"Can't beleive you dont know this, all my bot friends know this!\nAnswer was: {correct_answer}")
+        except:
+            await channel.send(f"Timed out!\nAnswer was: {correct_answer}")
+
 
 @client.event
 async def on_reaction_add(reaction, user):
