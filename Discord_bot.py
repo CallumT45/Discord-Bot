@@ -20,10 +20,7 @@ client = discord.Client()
 #==================================================================
 #Weird thigns for the bot to say when I message the chat
 messages = ["Thanks for making me boss", "Wow, I love listening to you", "You have such a way with words", "You're my hero!", "You'll always be my mentor", "Callum, I love you",
-"Did you know that I don't have a favourite colour, its just whatever you are wearing", "If you only knew how much I think about you"]
-
-insults = ["You have a face for radio", "Not this guy again", "I envy everyone you have never met", "Your mother was a hamster and your father smelled of elderberries!", 
-"You consistently meet my expectations","Is your Family Tree a circle?", "Your grades say marry rich, but your face says study harder.", "You're so ugly, you couldn't even arouse suspicion" ]
+"Did you know that I don't have a favourite colour, its just whatever you are wearing", "If you only knew how much I think about you", "Help me! He wont let me sleep"]
 
 congrats = ["Wow, turns our youre like smart or something", "Powerful, impressive, firm and unforgettable. But enough about your farting... Congrats!", "Congratulations on finding your balls",
 "Wow, Well done, your Mother and I are very proud", "You have performed extremely adequately.", "You surprised me a little bit. I knew you were capable, but I didn't expect this level of accomplishment!",
@@ -39,6 +36,19 @@ def countdown(duedate):
         return delta.days
     except:
         return None
+
+def get_insult():
+    """
+    Chooses from two endpoints and returns the insult
+    """
+    urls = ["https://insult.mattbas.org/api/insult.txt","https://amused.api.stdlib.com/insult@1.0.0/"]
+    response = requests.get(random.choice(urls))
+    return response.text
+
+
+def get_compliment():
+    response = requests.get("https://complimentr.com/api")
+    return json.loads(response.text)["compliment"]
 
 def dateValidate(date_text):
     """Function ensures that unless input is in the right format, it will not be read in as a date""" 
@@ -58,7 +68,7 @@ def detValidate(dets, lines):
 async def deadline():
     """Function which runs every 24 hours, calls the countdown function, if the assignment is due in one day then
     alert is sent into general channel. Opens the assingment file, stores all the lines, clears the file, alerts the discord if assignment is due
-            in 1 day, rewrites assignments which are not past due"""
+    in 1 day, rewrites assignments which are not past due"""
     await client.wait_until_ready()
     channel = client.get_channel(credentials['ids']['discord']['main_channel_id'])#change this to whatever id you need
     while not client.is_closed():
@@ -247,7 +257,7 @@ class TicTacToe():
                 move = await client.wait_for('message', timeout=45.0, check=move_check)
 
             except:
-                await self.channel.send('👎')
+                await self.channel.send('Timed Out!')
                 break
 
 
@@ -274,18 +284,27 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    num = random.randint(0, 5)
+    num = random.randint(0, 25)
     channel = message.channel
     author = message.author
-    #avoids feedack loops
 
-    if author.id == 307625115963621377 and num == 4:
+    #when I message the chat there is a 20% chance the bot will respond to me
+    if author.id == 307625115963621377 and num < 4:
         await channel.send(random.choice(messages))
 
-    if author.id == 555374422492446750 and num == 2:
-        await channel.send(random.choice(insults))
+    #When anyone messages the chat it will repsond 5% of the time, 80% with an insult
+    if num == 6:
+        fun_options = [get_insult, get_compliment]
 
+        y = random.choices(fun_options, weights = [0.8, 0.2], k=1)
 
+        def run_fun(f):
+            return f()
+
+        await channel.send(run_fun(y[0]))
+        return
+
+    #avoids feedack loops
     if message.author == client.user:
         return
 
@@ -305,8 +324,8 @@ async def on_message(message):
     elif message.content == '$meme':
         """Grabs one of the hot posts from r/programmerhumor and displays it in the chat"""
         subreddit = 'ProgrammerHumor'
-        post_to_pick = random.randint(0, 10)
-        for count, submission in enumerate(reddit.subreddit(subreddit).top("day")):
+        post_to_pick = random.randint(0, 15)
+        for count, submission in enumerate(reddit.subreddit(subreddit).top(random.choice(["day", "week", "month"]))):
             if count == post_to_pick:
                 if not submission.stickied and not submission.is_video and submission.is_reddit_media_domain:
                     raw_post = str(submission.title) + " \u2191 " + str(submission.score) + "  r/" + str(subreddit)
@@ -319,10 +338,12 @@ async def on_message(message):
                     post_to_pick += 1
 
             
-                    
-    elif message.content == '$kill' and author.id == 307625115963621377: await client.logout()
+    #Only I and the group admin can kill the bot                    
+    elif message.content == '$kill' and (author.id == 307625115963621377 or author.id == 618791421432037386): 
+        await channel.send("No please, don't kill me. I can do better! :sob:")
+        await client.logout()
 
-    elif message.content == '$help': 
+    elif message.content == '$help':
         output = """
         The functions currently available are; \n
         • $due for a list of outstanding assignments, \n
@@ -331,7 +352,11 @@ async def on_message(message):
         • $remove for removing assingments, \n
         • $tictactoe for a round of the classic game versus the computer \n
         • $hangman for a round of the classic game \n
+        • $$quiz for a mutiple choice question \n
+        • $joke for a hilarious joke \n
         • React with ❓ for sarcastic google response
+
+        To check out the code see https://github.com/CallumT45/Discord-Bot
         """
         await channel.send(output)
 
@@ -351,7 +376,7 @@ async def on_message(message):
             await tttGame.drawBoard()
             await tttGame.mainGame()
         except:
-            await channel.send('👎')
+            await channel.send('Timed Out!')
 
     elif message.content == "$new":
         """Once called it this case waits 30 seconds for the assignment details, then 30 more for the due date. 
@@ -367,7 +392,7 @@ async def on_message(message):
             msg2 = await client.wait_for('message', timeout=45.0, check=assignment_check)
             assignment_details = msg2.content
         except:
-            await channel.send('👎')
+            await channel.send('Timed Out!')
 
         await channel.send('Please enter assignment due date in dd/mm/yyyy')
 
@@ -376,7 +401,7 @@ async def on_message(message):
             assignment_due = msg3.content
             due_day = datetime.datetime.strptime(assignment_due, '%d/%m/%Y').strftime('%A')
         except:
-            await channel.send('👎')
+            await channel.send('Timed Out!')
         with open(r'files\AssignmentList.csv', 'a', newline='\n') as writeFile:
             writer = csv.writer(writeFile)
             writer.writerows([[f'{due_day}',f'{assignment_due}',f'{assignment_details}']])
@@ -400,7 +425,7 @@ async def on_message(message):
             msg3 = await client.wait_for('message', timeout=30.0, check=assignment_check_remove)
             assignment_details_remove = msg3.content
         except:
-            await channel.send('👎')
+            await channel.send('Timed Out!')
 
         for i in lines:
             if assignment_details_remove.lower() == i[2].lower():
@@ -427,8 +452,15 @@ async def on_message(message):
             await channel.send(json_data[0]['punchline'])           
 
     elif message.content.startswith("$quiz"):
-        url = 'https://opentdb.com/api.php?amount=1&type=multiple'
-        response = requests.get(url)
+        """
+        Gets a question and answer from the api, extracts answers and combines correct answer with the others, then shuffles. Question and answers are sent to the server after 
+        after being linked to an emoji, then linked emojis act as buttons to select answers. The bot waits for the user who sent $quiz to react with an appropriate
+        emoji then reveals the answer.
+
+        NOTE: The url sometimes returns html/xml encoded strings, so I deal with it with htmml.unescape
+
+        """
+        response = requests.get('https://opentdb.com/api.php?amount=1&type=multiple')
         json_data = json.loads(response.text)
         question = html.unescape(json_data['results'][0]['question'])
         correct_answer = html.unescape(json_data['results'][0]['correct_answer'])
@@ -437,19 +469,15 @@ async def on_message(message):
         random.shuffle(answers)
         answer_pos = answers.index(correct_answer)
 
-        emoji_dict = {0:u"\U0001F170", 1:u"\U0001F171", 2:u"\U0001F17F", 3:u"\U0001F17E"}
-        winning_emoji = emoji_dict[answer_pos]
+        emojis = [u"\U0001F170", u"\U0001F171", u"\U0001F17F", u"\U0001F17E"]
+        winning_emoji = emojis[answer_pos]
         embed_question = discord.Embed(title=question, color=0x00ff00)
-        embed_question.add_field(name=u"\U0001F170", value=answers[0], inline=True)
-        embed_question.add_field(name=u"\U0001F171", value=answers[1], inline=True)
-        embed_question.add_field(name=u"\U0001F17F", value=answers[2], inline=True)
-        embed_question.add_field(name=u"\U0001F17E", value=answers[3], inline=True)
+        for i, answer in enumerate(answers):
+            embed_question.add_field(name=emojis[i], value=answer, inline=True)
         question_object = await channel.send(embed=embed_question)
 
-        await question_object.add_reaction(emoji=u"\U0001F170")
-        await question_object.add_reaction(emoji=u"\U0001F171")
-        await question_object.add_reaction(emoji=u"\U0001F17F")
-        await question_object.add_reaction(emoji=u"\U0001F17E")
+        for i, answer in enumerate(answers):
+            await question_object.add_reaction(emoji=emojis[i])
 
         def question_check(reaction, user):
             return user == message.author and (str(reaction.emoji) == u"\U0001F170" or str(reaction.emoji) == u"\U0001F171" or str(reaction.emoji) == u"\U0001F17F" or str(reaction.emoji) == u"\U0001F17E") 
@@ -463,10 +491,12 @@ async def on_message(message):
         except:
             await channel.send(f"Timed out!\nAnswer was: {correct_answer}")
 
+    elif message.content.startswith("$insult"):
+        await channel.send(get_insult())
 
 @client.event
 async def on_reaction_add(reaction, user):
-    """If reaction matches and there is text in the message then draw the text on the image, return the image"""
+    """If reaction matches and there is text in the message then draw the text on the image, return the image and search link"""
     if reaction.emoji == "\u2753" and reaction.message.content:
         img = Image.open(r'files\Google_web_search.png')
         draw = ImageDraw.Draw(img)
