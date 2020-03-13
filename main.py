@@ -115,4 +115,4 @@ async def on_reaction_add(reaction, user):
 
 
 client.loop.create_task(deadline())
-client.run('Njc1Mzg0MTY1MDA0MzQ1MzQ1.XmvxvA.8ExdfmAeoIdUI1Mfiz6OU0WX8bg')
+client.run(credentials['ids']['discord']['server_id'])
