@@ -35,7 +35,7 @@ async def deadline():
     alert is sent into general channel. Opens the assingment file, stores all the lines, clears the file, alerts the discord if assignment is due
     in 1 day, rewrites assignments which are not past due"""
     await client.wait_until_ready()
-    channel = client.get_channel(670711379270828057)#change this to whatever id you need
+    channel = client.get_channel(credentials['ids']['discord']['main_channel_id'])#change this to whatever id you need
     while not client.is_closed():
         lines = []
         try:
