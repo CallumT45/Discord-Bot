@@ -294,6 +294,11 @@ class Games(commands.Cog):
 
     @commands.command()
     async def tictactoe(self, ctx):
+        """
+            It's TicTacToe! Now with PvP
+
+        """
+
 
         emojis = ['\u0031\u20E3','\u0032\u20E3']
         embed_tac = discord.Embed(title='How many players?', color=0x00ff00)

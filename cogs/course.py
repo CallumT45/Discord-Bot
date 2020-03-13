@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands
-import random, io, asyncio, datetime, urllib, csv, json, requests, html
+import random, asyncio, datetime, csv, json
 
-from urllib.request import Request, urlopen
 from PIL import Image, ImageDraw, ImageFont
 
 with open('files/credentials.txt', 'r') as credfile:
@@ -16,7 +15,10 @@ class Course(commands.Cog):
 
     @commands.command()
     async def problem(self, ctx):
-        with open('problems.json', 'r') as credfile:
+        """
+            Gives a random problem from the popular coding website leetcode.com
+        """
+        with open('files/problems.json', 'r') as credfile:
             problems = json.load(credfile)
 
             num = random.randint(0, 1021)
@@ -30,7 +32,7 @@ class Course(commands.Cog):
 
     @commands.command()
     async def due(self, ctx):
-        """Prints the contents of the assignments csv in a nice clear format"""
+        """Prints the contents of the assignments csv in a discord embedded message"""
         def countdown(duedate):
             """Given a date, calculates the number of days from today until then"""
             try:
@@ -53,7 +55,7 @@ class Course(commands.Cog):
 
     @commands.command()
     async def new(self, ctx):
-        """Once called it this case waits 30 seconds for the assignment details, then 30 more for the due date. 
+        """Once called it this case waits 45 seconds for the assignment details, then 45 more for the due date. 
         For the due date it will only read in inputs which are in the right format"""
         await ctx.send('Please enter assignment details')
 
@@ -131,6 +133,9 @@ class Course(commands.Cog):
 
     @commands.command()
     async def poll(self, ctx, *args):
+        """
+            Call this command followed by the question, then up to 9 options separated by spaces, use quotes where necessary
+        """
         emojis = ['\u0031\u20E3','\u0032\u20E3','\u0033\u20E3','\u0034\u20E3','\u0035\u20E3','\u0036\u20E3','\u0037\u20E3','\u0038\u20E3','\u0039\u20E3']
         embed_poll = discord.Embed(title=args[0], color=0x00ff00)
 

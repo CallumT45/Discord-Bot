@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import random, io, asyncio, json, requests, html, bs4, re, datetime
+import requests, html, bs4, re, datetime, io, random, json
 import matplotlib.pyplot as plt
 class Misc(commands.Cog):
 
@@ -9,6 +9,10 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def covid(self, ctx):
+        """
+            Scrapes Wikipedia for number of confirmed cases in Ireland, returns the data in list and graphical form. 
+            If not working, wikipedia must have changed how the are displaying the data.
+        """
 
         res = requests.get("https://en.wikipedia.org/wiki/2020_coronavirus_pandemic_in_the_Republic_of_Ireland")
 
@@ -81,6 +85,27 @@ class Misc(commands.Cog):
                 break
             except Exception as e:
                 continue
+
+
+
+    @commands.command()
+    async def insult(self, ctx):
+        """
+        Chooses from two endpoints and returns the insult
+        """
+        urls = ["https://insult.mattbas.org/api/insult.txt","https://amused.api.stdlib.com/insult@1.0.0/"]
+        response = requests.get(random.choice(urls))
+        await ctx.send(response.text)
+
+    @commands.command()
+    async def compliment(self, ctx):
+        """
+        Life got you down?
+        """
+        response = requests.get("https://complimentr.com/api")
+        
+        await ctx.send(json.loads(response.text)["compliment"])
+
 
 
 def setup(client):
