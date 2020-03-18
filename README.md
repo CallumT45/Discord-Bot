@@ -13,4 +13,6 @@ MScBot has a lot of features, split into 4 categories. Each commmand is called w
 
 * __Misc__ $covid
 There is also a feature to react to a message with ❓, to create a google search link to that message.
-![Alt](/files/demo_images/hangman.png "Hangman")
+![Hangman](/files/demo_images/hangman.PNG "Hangman")
+![Quiz](/files/demo_images/quiz.PNG "Quiz")
+![Covid](/files/demo_images/covid.PNG "Covid")
