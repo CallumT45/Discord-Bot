@@ -20,6 +20,6 @@ __Sample Images__
 <img src="/files/demo_images/covid.PNG" alt="Covid"
 	title="Covid" width="250"/>
     <img src="/files/demo_images/quiz.PNG" alt="Quiz"
-	title="Quiz Demo" width="250"/>
+	title="Quiz Demo" width="300"/>
     <img src="/files/demo_images/hangman.PNG" alt="Hangman"
-	title="Hangman Demo" width="250"/>
+	title="Hangman Demo" width="300"/>
