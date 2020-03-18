@@ -16,14 +16,10 @@ MScBot has a lot of features, split into 4 categories. Each commmand is called w
 There is also a feature to react to a message with ❓, to create a google search link to that message.
 
 __Sample Images__
-![Hangman](/files/demo_images/hangman.PNG "Hangman")
-![Quiz](/files/demo_images/quiz.PNG "Quiz")
-![Covid](/files/demo_images/covid.PNG "Covid")
-
 
 <img src="/files/demo_images/covid.PNG" alt="Covid"
-	title="Covid" width="150"/>
+	title="Covid" width="250"/>
     <img src="/files/demo_images/quiz.PNG" alt="Quiz"
-	title="Quiz Demo" width="150"/>
+	title="Quiz Demo" width="250"/>
     <img src="/files/demo_images/hangman.PNG" alt="Hangman"
-	title="Hangman Demo" width="150"/>
+	title="Hangman Demo" width="250"/>
