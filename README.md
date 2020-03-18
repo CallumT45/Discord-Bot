@@ -10,12 +10,13 @@ MScBot has a lot of features, split into 4 categories. Each commmand is called w
 
 * __Games__ ``$tictactoe`` ``$hangman`` ``$quiz``
 
-* __Course__ $due $new $remove $problem $poll
+* __Course__ ``$due`` ``$new`` ``$remove`` ``$problem`` ``$poll``
 
-* __Misc__ $covid
+* __Misc__ ``$covid``
+
 There is also a feature to react to a message with ❓, to create a google search link to that message.
 
-__Sample Images__
+## Sample Images
 
 <img src="/files/demo_images/covid.PNG" alt="Covid"
 	title="Covid" width="250"/>
