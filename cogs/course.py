@@ -44,7 +44,7 @@ class Course(commands.Cog):
             except:
                 return None
         
-        with open(r'files\AssignmentList.csv','r') as csv_file:
+        with open('files/AssignmentList.csv','r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             text = ''
             for row in csv_reader:
@@ -88,7 +88,7 @@ class Course(commands.Cog):
         except Exception as e:
             await ctx.send(e)
             await ctx.send('Timed Out!')
-        with open(r'files\AssignmentList.csv', 'a', newline='\n') as writeFile:
+        with open('files/AssignmentList.csv', 'a', newline='\n') as writeFile:
             writer = csv.writer(writeFile)
             writer.writerows([[f'{due_day}',f'{assignment_due}',f'{assignment_details}']])
 
@@ -99,7 +99,7 @@ class Course(commands.Cog):
         lines = []
         await ctx.send('Please enter assignment details')
 
-        with open(r'files\AssignmentList.csv', 'r') as readFile:
+        with open('files/AssignmentList.csv', 'r') as readFile:
             csv_reader = csv.reader(readFile, delimiter=',')
             
             for row in csv_reader:
@@ -126,7 +126,7 @@ class Course(commands.Cog):
                 lines.remove(i)
         
         
-        with open(r'files\AssignmentList.csv', 'w', newline='\n') as writeFile:
+        with open('files/AssignmentList.csv', 'w', newline='\n') as writeFile:
             writer = csv.writer(writeFile)
             writer.writerows(lines)
         writeFile.close()

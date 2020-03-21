@@ -162,7 +162,7 @@ class TicTacToe():
 
     async def mainGame(self):
         def move_check(m):
-            return (m.content in list(map(lambda x: str(x), self.turns))  or m.content.lower() == "$stop")
+            return (m.content in list(map(lambda x: str(x), self.turns))  or m.content.lower() == "stop")
         flag = True
         while flag:#while no victory is determined or while there are turns left to make
             
@@ -176,7 +176,7 @@ class TicTacToe():
                 break
 
 
-            if move.content == "$stop":
+            if move.content == "stop":
                 flag = False
             else:
                 self.player_move(int(move.content), self.player_letter)

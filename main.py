@@ -39,7 +39,7 @@ async def deadline():
     while not client.is_closed():
         lines = []
         try:
-            with open(r'files\AssignmentList.csv', 'r') as readFile:
+            with open('files/AssignmentList.csv', 'r') as readFile:
                 csv_reader = csv.reader(readFile, delimiter=',')
                 
                 for row in csv_reader:
@@ -54,7 +54,7 @@ async def deadline():
                         lines.remove(row)
                     
             lines.sort(key=lambda x: datetime.datetime.strptime(x[1], "%d/%m/%Y"))#sorts the assignments by due date
-            with open(r'files\AssignmentList.csv', 'w', newline='\n') as writeFile:
+            with open('files/AssignmentList.csv', 'w', newline='\n') as writeFile:
                 writer = csv.writer(writeFile)
                 writer.writerows(lines)
 
@@ -97,10 +97,10 @@ for filename in os.listdir("./cogs"):
 async def on_reaction_add(reaction, user):
     """If reaction matches and there is text in the message then draw the text on the image, return the image and search link"""
     if reaction.emoji == "\u2753" and reaction.message.content:
-        img = Image.open(r'files\Google_web_search.png')
+        img = Image.open('files/Google_web_search.png')
         draw = ImageDraw.Draw(img)
 
-        font = ImageFont.truetype(r"files\OpenSans-Regular.ttf", 18)
+        font = ImageFont.truetype("files/OpenSans-Regular.ttf", 18)
         # draw the message on the background
         search_terms = reaction.message.content.replace(" ", "+")
         link = "https://www.google.com/search?q=" + search_terms  

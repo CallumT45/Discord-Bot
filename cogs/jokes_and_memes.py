@@ -38,6 +38,37 @@ class Jokes_and_Memems(commands.Cog):
                 else:
                     post_to_pick += 1
 
+    @commands.command()
+    async def dankmeme(self, ctx):
+        """Grabs one of the hot posts from r/dankmemes and displays it in the chat"""
+        subreddit = 'dankmemes'
+        post_to_pick = random.randint(0, 15)
+        for count, submission in enumerate(reddit.subreddit(subreddit).top(random.choice(["day", "week", "month"]))):
+            if count == post_to_pick:
+                if not submission.stickied and not submission.is_video and submission.is_reddit_media_domain:
+                    raw_post = str(submission.title) + " \u2191 " + str(submission.score) + "  r/" + str(subreddit)
+                    imgURL = submission.url
+                    raw_data = urllib.request.urlopen(imgURL).read()
+                    im = io.BytesIO(raw_data)
+                    await ctx.send(raw_post, file=discord.File(im, "funny_meme.png"))
+                    break
+                else:
+                    post_to_pick += 1
+
+    @commands.command()
+    async def showerthought(self, ctx):
+        """Grabs one of the hot posts from r/showerthought and displays it in the chat"""
+        subreddit = 'showerthoughts'
+        post_to_pick = random.randint(0, 15)
+        for count, submission in enumerate(reddit.subreddit(subreddit).top(random.choice(["week", "month"]))):
+            if count == post_to_pick:
+                if not submission.stickied and not submission.is_video:
+                    raw_post = str(submission.title) + " \u2191 " + str(submission.score)
+                    await ctx.send(raw_post)
+                    break
+                else:
+                    post_to_pick += 1
+
 
     @commands.command()
     async def joke(self, ctx):
