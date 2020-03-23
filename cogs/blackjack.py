@@ -118,15 +118,28 @@ class BlackJack():
 
     async def draw_start(self):
         for i, player in enumerate(self.players):
+            def bet_check(m):
+                try:
+                    value = float(m.content)
+                    if 0 <= value <= player.coins:
+                        return True
+                    else: return False
+                except:
+                    return False
             if not player.out:
-                await self.ctx.send(f"Player {i+1}")
-                bet = float(input(f"How much would you like to bet? You have {player.coins} in the bank: "))
-                if bet == 0:
+                await self.ctx.send(f"Player {i+1}, How much would you like to bet? You have {player.coins} in the bank: ")
+                try:
+                    bet = await self.client.wait_for('message', timeout=120.0, check=bet_check)
+                    bet = float(bet.content)
+                    if bet == 0:
+                        player.out = True
+                    else:
+                        player.debit(bet)
+                        player.bet = bet
+                except:
+                    await self.ctx.send("Timed Out!")
                     player.out = True
-                else:
-                    player.debit(bet)
-                    player.bet = bet
-
+                    
         self.deck.shuffle()
         self.dealer.clear()
         self.deck.move_cards(self.dealer, 1)
