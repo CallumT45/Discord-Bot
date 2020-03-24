@@ -83,9 +83,9 @@ class Course(commands.Cog):
                 msg3 = await self.client.wait_for('message', timeout=45.0, check=assignment_date_check)
                 assignment_due = msg3.content
                 due_day = datetime.datetime.strptime(assignment_due, '%d/%m/%Y').strftime('%A')
-            with open('files/AssignmentList.csv', 'a', newline='\n') as writeFile:
-                writer = csv.writer(writeFile)
-                writer.writerows([[f'{due_day}',f'{assignment_due}',f'{assignment_details}']])
+                with open('files/AssignmentList.csv', 'a', newline='\n') as writeFile:
+                    writer = csv.writer(writeFile)
+                    writer.writerows([[f'{due_day}',f'{assignment_due}',f'{assignment_details}']])
 
             except:
                 await ctx.send('Timed Out!')

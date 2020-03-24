@@ -31,7 +31,7 @@ class Deck(object):
     """
     suits = ['Spades','Hearts','Diamonds','Clubs']
     rank = [None,'Ace','King','Queen','Jack',10,9,8,7,6,5,4,3,2]
-
+    suit_dict = {'Hearts':'\U00002665','Spades':'\U00002664','Diamonds':'\U00002666', 'Clubs':'\U00002667'}
     def __init__(self, num_decks = 1):
         self.cards = []
         for i in range(4*num_decks):
@@ -74,7 +74,7 @@ class Deck(object):
     def __str__(self):
         text = ''
         for card in self.cards:
-            text += str(card.rank) + " " + card.suit + '\n'
+            text += str(card.rank) + " " + Deck.suit_dict[card.suit] + '\n'
         return text
 
 class Player(Deck):
@@ -104,7 +104,8 @@ class Player(Deck):
         self.cards = [] 
 
 class BlackJack():
-    def __init__(self, num_players, ctx, client):
+    
+    def __init__(self, num_players, ctx, client, users):
         self.players = []
         self.deck = Deck(6)#using 6 decks as per casino standard
         self.dealer = Player()
@@ -114,6 +115,7 @@ class BlackJack():
         self.total_players_out = 0
         self.ctx = ctx
         self.client = client
+        self.users = users
 
 
     async def draw_start(self):
@@ -127,7 +129,7 @@ class BlackJack():
                 except:
                     return False
             if not player.out:
-                await self.ctx.send(f"Player {i+1}, How much would you like to bet? You have {player.coins} in the bank: ")
+                await self.ctx.send(f"{self.users[i].name}, How much would you like to bet? You have {player.coins} in the bank: ")
                 try:
                     bet = await self.client.wait_for('message', timeout=120.0, check=bet_check)
                     bet = float(bet.content)
@@ -155,7 +157,7 @@ class BlackJack():
                 if not player.out:
                     player.clear()
                     self.deck.move_cards(player, 2)
-                    embed_players.add_field(name=f"Player {i+1}", value=player, inline=True)
+                    embed_players.add_field(name=self.users[i].name, value=player, inline=True)
                     if player.get_value() == 21:
                         player.has_bj = True
             self.players_msg = await self.ctx.send(embed = embed_players)
@@ -171,7 +173,7 @@ class BlackJack():
                 while HoS != "stand":
                     embed_players = discord.Embed(title='Players', color=0x0000fd)
                     try:
-                        await self.ctx.send(f"Player {i+1}, Would you like to hit or stand? ")
+                        await self.ctx.send(f"{self.users[i].name}, Would you like to hit or stand? ")
                         HoS = await self.client.wait_for('message', timeout=20.0, check=turn_check)
                         HoS = HoS.content.lower()
 
@@ -182,14 +184,14 @@ class BlackJack():
                             self.deck.move_cards(player, 1)#give the player a new card
                             for j, player2 in enumerate(self.players):#reload the embed with player hands
                                 if not player.out:
-                                    embed_players.add_field(name=f"Player {j+1}", value=player2, inline=True)
+                                    embed_players.add_field(name=f"{self.users[i].name}", value=player2, inline=True)
                                     await self.players_msg.edit(embed = embed_players)
 
                         if player.get_value() > 21:
-                            await self.ctx.send(f"Player {i+1} is bust")
+                            await self.ctx.send(f"{self.users[i].name} is bust")
                             break
                         elif player.get_value() == 21:
-                            await self.ctx.send(f"Player {i+1} has BlackJack!")
+                            await self.ctx.send(f"{self.users[i].name} has BlackJack!")
                             player.has_bj = True
                             break
 
@@ -220,13 +222,13 @@ class BlackJack():
             for i, player in enumerate(self.players):
                 if player.has_bj or (player.get_value() < 21 and  player.get_value() > self.dealer.get_value()) and not player.out:
                     if_flag = True
-                    await self.ctx.send(f"Player {i+1}, Conrats on winning!")
+                    await self.ctx.send(f"{self.users[i].name}, Conrats on winning!")
                     player.credit(2 * player.bet)
                 elif player.get_value() < 21 and  player.get_value() == self.dealer.get_value() and not player.out:
                     if_flag = True
-                    await self.ctx.send(f"Player {i+1}, tied with the dealer!")
+                    await self.ctx.send(f"{self.users[i].name}, tied with the dealer!")
                     player.credit(player.bet)
-            if not if_flag:
+            if not if_flag and self.total_players_out < len(self.players):
                 await self.ctx.send("House wins")
 
 
@@ -234,11 +236,11 @@ class BlackJack():
             if not player.out:
                 player.has_bj = False
                 if player.coins < 1:
-                    await self.ctx.send(f"Player {i+1}, Min bet is €1, get your cheap ass out of here")
+                    await self.ctx.send(f"{self.users[i].name}, Min bet is €1, get your cheap ass out of here")
                     player.out = True
                     self.total_players_out += 1
                 elif player.coins > 10000:
-                    await self.ctx.send(f"Player {i+1}! You\'re too good, we have to stop you")
+                    await self.ctx.send(f"{self.users[i].name}! You\'re too good, we have to stop you")
                     player.out = True
                     self.total_players_out += 1
 
@@ -248,7 +250,7 @@ class BlackJack():
             await self.draw_start()
             await self.round()
         for i, player in enumerate(self.players):
-            await self.ctx.send(f"Player {i+1} you are leaving with {player.coins}")
+            await self.ctx.send(f"{self.users[i].name} you are leaving with {player.coins}")
 
 class Blackjack(commands.Cog):
 
@@ -257,8 +259,53 @@ class Blackjack(commands.Cog):
 
     @commands.command()    
     async def blackjack(self, ctx):
-        bj = BlackJack(2, ctx, self.client)
-        await bj.main()
+
+
+
+        objective ="""
+            Beat The Dealer. There are some misconceptions about the objective of the game of blackjack but at the simplest level all you are trying to do is beat the dealer.
+        """
+        how_to_play1 = """
+            • By drawing a hand value that is higher than the dealer’s hand value
+            • By the dealer drawing a hand value that goes over 21.
+            • By drawing a hand value of 21 on your first two cards, when the dealer does not."""
+        how_to_play2 = """
+            • Your hand value exceeds 21.
+            • The dealers hand has a greater value than yours at the end of the round
+            """
+
+        find_value = """
+            • 2 through 10 count at face value, i.e. a 2 counts as two, a 9 counts as nine.
+            • Face cards (J,Q,K) count as 10.
+            • Ace can count as a 1 or an 11 depending on which value helps the hand the most.
+
+
+            """
+        
+
+        embed_rules = discord.Embed(title="Blackjack", color=0x00ff00)
+
+        embed_rules.add_field(name='Objective', value=objective, inline=False)
+        embed_rules.add_field(name='How do you beat the dealer?', value=how_to_play1, inline=False)
+        embed_rules.add_field(name='How do you lose to the dealer? ', value=how_to_play2, inline=False)
+        embed_rules.add_field(name='How Do You Find a Hand’s Total Value?', value=find_value, inline=False)
+        embed_rules.add_field(name='How to Join', value='To play react to this message', inline=False)
+
+        msg = await ctx.send(embed=embed_rules)
+        await msg.add_reaction(emoji = "✅")
+        await asyncio.sleep(15)
+
+        cache_msg = discord.utils.get(self.client.cached_messages, id = msg.id)
+        reaction = cache_msg.reactions[0]
+        users = await reaction.users().flatten()
+        users = [x for x in users if str(x) != 'Test Bot#3617']
+        if len(users) > 0:
+            bj = BlackJack(len(users), ctx, self.client, users)
+            await bj.main()
+        else:
+            await ctx.send("You need at least 1 to play!")
+
+
 
 def setup(client):
     client.add_cog(Blackjack(client))
