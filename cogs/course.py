@@ -76,21 +76,23 @@ class Course(commands.Cog):
         try:
             msg2 = await self.client.wait_for('message', timeout=45.0, check=assignment_check)
             assignment_details = msg2.content
+
+            await ctx.send('Please enter assignment due date in dd/mm/yyyy')
+
+            try:
+                msg3 = await self.client.wait_for('message', timeout=45.0, check=assignment_date_check)
+                assignment_due = msg3.content
+                due_day = datetime.datetime.strptime(assignment_due, '%d/%m/%Y').strftime('%A')
+            with open('files/AssignmentList.csv', 'a', newline='\n') as writeFile:
+                writer = csv.writer(writeFile)
+                writer.writerows([[f'{due_day}',f'{assignment_due}',f'{assignment_details}']])
+
+            except:
+                await ctx.send('Timed Out!')
         except:
             await ctx.send('Timed Out!')
 
-        await ctx.send('Please enter assignment due date in dd/mm/yyyy')
-
-        try:
-            msg3 = await self.client.wait_for('message', timeout=45.0, check=assignment_date_check)
-            assignment_due = msg3.content
-            due_day = datetime.datetime.strptime(assignment_due, '%d/%m/%Y').strftime('%A')
-        except Exception as e:
-            await ctx.send(e)
-            await ctx.send('Timed Out!')
-        with open('files/AssignmentList.csv', 'a', newline='\n') as writeFile:
-            writer = csv.writer(writeFile)
-            writer.writerows([[f'{due_day}',f'{assignment_due}',f'{assignment_details}']])
+        
 
 
     @commands.command()
