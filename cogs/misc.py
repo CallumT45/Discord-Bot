@@ -99,9 +99,9 @@ class Misc(commands.Cog):
     @commands.command()
     async def covid2(self, ctx):
         """
-        #             Scrapes Wikipedia for number of confirmed cases in Ireland, returns the data in list and graphical form. 
-        #             If not working, wikipedia must have changed how the are displaying the data.
-        #         """
+        Scrapes Wikipedia for number of confirmed cases in Ireland, returns the data in list and graphical form. 
+        If not working, wikipedia must have changed how the are displaying the data.
+        """
 
         res = requests.get("https://en.wikipedia.org/wiki/2020_coronavirus_pandemic_in_the_Republic_of_Ireland")
 
