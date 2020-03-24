@@ -27,6 +27,13 @@ class Codename():
         self.neutral_words = list(set(self.game_words) - set(self.blue_words) - set(self.red_words) - set(self.black_card))
         self.guessed_words = []
         self.flag = True
+        self.spymaster_updates = 0
+
+        self.blue_spymaster = random.choice(self.blue)
+        self.red_spymaster = random.choice(self.red)
+
+        self.blue_spymaster = self.client.get_user(int(self.blue_spymaster.id))
+        self.red_spymaster = self.client.get_user(int(self.red_spymaster.id))
 
     async def spymaster(self):
             
@@ -47,14 +54,15 @@ class Codename():
                     idenifier = 'Game Over'
                 embed_code.add_field(name=idenifier,value=str_w, inline=True)
 
-            blue_spymaster = random.choice(self.blue)
-            red_spymaster = random.choice(self.red)
 
-            blue_spymaster = self.client.get_user(int(blue_spymaster.id))
-            red_spymaster = self.client.get_user(int(red_spymaster.id))
+            if self.spymaster_updates == 0:
+                self.blue_spymaster_msg = await self.blue_spymaster.send(embed=embed_code)
+                self.red_spymaster_msg = await self.red_spymaster.send(embed=embed_code)
 
-            await blue_spymaster.send(embed=embed_code)
-            await red_spymaster.send(embed=embed_code)
+            else:
+                await self.blue_spymaster_msg.edit(embed = embed_code)
+                await self.red_spymaster_msg.edit(embed = embed_code)
+            self.spymaster_updates += 1
 
 
     async def game_loop(self, team):
@@ -69,8 +77,6 @@ class Codename():
             colour = 0xff0000
 
         while team_num > 0:
-            # await self.ctx.send(f"{team} team choose your letters\n\nBlue Words: {self.blue_cards}\nRed Words: {self.red_cards}")
-
             embed_code = discord.Embed(title=f"Codename\n\nBlue Words: {self.blue_cards}\nRed Words: {self.red_cards}", color=colour)
 
             for w in self.game_words:
@@ -143,8 +149,11 @@ class Codenames(commands.Cog):
 
     @commands.command()    
     async def codenames(self, ctx):
+        objective ="""
+            The aim of the game is to find all of your teams words in the word grid. First team to Zero wins.
+        """
         how_to_play = """
-            You need at least four players (two teams of two) for a standard game. 
+            You need at least four players (two teams of two, red and blue) for a standard game. 
             Each team has one player as their spymaster. Both spymasters will be sent a dm with the answer key.
             \nIf you are the spymaster, you are trying to think of a one-word clue that relates to some of the words your team is trying to guess. 
             When you think you have a good clue, you say it. You also say one number, which tells your teammates how many codenames are related to your clue."""
@@ -154,14 +163,15 @@ class Codenames(commands.Cog):
         how_to_play2 = """Getting four words with one clue is a big accomplishment. The field operatives must always make at least one guess. 
             Any wrong guess ends the turn immediately, but if the field operatives guess a word of their team's color, they can keep guessing. 
             You have 120 seconds for each word to guess. To guess a word type it into the chat. Once you have guessed as many words as your spymaster has linked. Your turn is over.
-            Type end_turn to finish your turn or stop to end the game"""
+            Type end_turn to finish your turn or stop to end the game. Careful where you pick, choose incorrectly and find the assassin, that's Game Over!"""
         
 
         embed_rules = discord.Embed(title="Codenames", color=0x00ff00)
 
+        embed_rules.add_field(name='Objective', value=objective, inline=False)
         embed_rules.add_field(name='How to Play', value=how_to_play, inline=False)
         embed_rules.add_field(name='Example', value=Example1, inline=False)
-        embed_rules.add_field(name='How to Play', value=how_to_play2, inline=False)
+        embed_rules.add_field(name='How to Play contd', value=how_to_play2, inline=False)
         embed_rules.add_field(name='How to Join', value='To play react to this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
