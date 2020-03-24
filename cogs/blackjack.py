@@ -92,6 +92,12 @@ class Player(Deck):
         value = 0
         for card in self.cards:
             value += bj_rankings[card.rank]
+
+        if value > 21:
+            bj_rankings['Ace'] = 1        
+            value = 0
+            for card in self.cards:
+                value += bj_rankings[card.rank]
         return value
 
     def credit(self, amount):
@@ -143,6 +149,7 @@ class BlackJack():
                     await self.ctx.send("Timed Out!")
                     player.out = True
                     self.total_players_out += 1
+
         if self.total_players_out < len(self.players):#if all players arent out
             self.deck.shuffle()
             self.dealer.clear()
@@ -207,16 +214,16 @@ class BlackJack():
         await self.dealer_msg.edit(embed=embed_dealer)    
 
         if_flag = False
-        if self.dealer.get_value() > 21:
+        if self.dealer.get_value() > 21 and self.total_players_out < len(self.players):
             for player in self.players:
-                if player.get_value() <= 21:#if they have not gone bust
+                if player.get_value() <= 21 and not player.out:#if they have not gone bust
                     player.credit(2 * player.bet)
             await self.ctx.send("Since Dealer is bust, all players win")
 
-        elif self.dealer.get_value() == 21:
+        elif self.dealer.get_value() == 21 and self.total_players_out < len(self.players):
             await self.ctx.send("Dealer has BlackJack!")
             for player in self.players:
-                if player.has_bj:
+                if player.has_bj and not player.out:
                     player.credit(2 * player.bet)
         else:
             for i, player in enumerate(self.players):
@@ -259,9 +266,6 @@ class Blackjack(commands.Cog):
 
     @commands.command()    
     async def blackjack(self, ctx):
-
-
-
         objective ="""
             Beat The Dealer. There are some misconceptions about the objective of the game of blackjack but at the simplest level all you are trying to do is beat the dealer.
         """
@@ -273,15 +277,11 @@ class Blackjack(commands.Cog):
             • Your hand value exceeds 21.
             • The dealers hand has a greater value than yours at the end of the round
             """
-
         find_value = """
             • 2 through 10 count at face value, i.e. a 2 counts as two, a 9 counts as nine.
             • Face cards (J,Q,K) count as 10.
             • Ace can count as a 1 or an 11 depending on which value helps the hand the most.
-
-
-            """
-        
+            """        
 
         embed_rules = discord.Embed(title="Blackjack", color=0x00ff00)
 
@@ -289,16 +289,17 @@ class Blackjack(commands.Cog):
         embed_rules.add_field(name='How do you beat the dealer?', value=how_to_play1, inline=False)
         embed_rules.add_field(name='How do you lose to the dealer? ', value=how_to_play2, inline=False)
         embed_rules.add_field(name='How Do You Find a Hand’s Total Value?', value=find_value, inline=False)
+        embed_rules.add_field(name='How to Play?', value='Type hit for another card, type stand to keep your hand. Bet 0 to walk away!', inline=False)
         embed_rules.add_field(name='How to Join', value='To play react to this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
-        await msg.add_reaction(emoji = "✅")
+        await msg.add_reaction(emoji = '\U00002705')
         await asyncio.sleep(15)
 
         cache_msg = discord.utils.get(self.client.cached_messages, id = msg.id)
         reaction = cache_msg.reactions[0]
         users = await reaction.users().flatten()
-        users = [x for x in users if str(x) != 'Test Bot#3617']
+        users = [x for x in users if str(x) != str(self.client.user)]
         if len(users) > 0:
             bj = BlackJack(len(users), ctx, self.client, users)
             await bj.main()
