@@ -133,77 +133,96 @@ class BlackJack():
                     bet = float(bet.content)
                     if bet == 0:
                         player.out = True
+                        self.total_players_out += 1
                     else:
                         player.debit(bet)
                         player.bet = bet
                 except:
                     await self.ctx.send("Timed Out!")
                     player.out = True
-                    
-        self.deck.shuffle()
-        self.dealer.clear()
-        self.deck.move_cards(self.dealer, 1)
+                    self.total_players_out += 1
+        if self.total_players_out < len(self.players):#if all players arent out
+            self.deck.shuffle()
+            self.dealer.clear()
+            self.deck.move_cards(self.dealer, 1)
 
-        await self.ctx.send("Dealer")
-        await self.ctx.send(self.dealer)
+            embed_dealer = discord.Embed(title='Dealer', color=0x00ff00)
+            embed_dealer.add_field(name="Hand", value=self.dealer, inline=False)
+            self.dealer_msg = await self.ctx.send(embed = embed_dealer)
 
-
-        for i, player in enumerate(self.players):
-            if not player.out:
-                await self.ctx.send(f"Player {i+1}")
-                player.clear()
-                self.deck.move_cards(player, 2)
-                await self.ctx.send(player)
+            embed_players = discord.Embed(title='Players', color=0x0000fd)
+            for i, player in enumerate(self.players):
+                if not player.out:
+                    player.clear()
+                    self.deck.move_cards(player, 2)
+                    embed_players.add_field(name=f"Player {i+1}", value=player, inline=True)
+                    if player.get_value() == 21:
+                        player.has_bj = True
+            self.players_msg = await self.ctx.send(embed = embed_players)
 
     async def round(self):
+
+        def turn_check(m):
+            return (m.content.lower() == 'stand') or (m.content.lower() == 'hit')
+
         for i, player in enumerate(self.players):
             if not player.out:
                 HoS = ''
                 while HoS != "stand":
-                    await self.ctx.send(player)
-                    HoS = input(f"Player {i+1}, Would you like to hit or stand? ").lower()
-                    if HoS == "hit":
-                        self.deck.move_cards(player, 1)
-                    if player.get_value() > 21:
-                        await self.ctx.send(f"Player {i+1} is bust")
-                        await self.ctx.send(player)
-                        break
-                    elif player.get_value() == 21:
-                        await self.ctx.send(f"Player {i+1} has BlackJack!")
-                        await self.ctx.send(player)
-                        player.has_bj = True
-                        break
+                    embed_players = discord.Embed(title='Players', color=0x0000fd)
+                    try:
+                        await self.ctx.send(f"Player {i+1}, Would you like to hit or stand? ")
+                        HoS = await self.client.wait_for('message', timeout=20.0, check=turn_check)
+                        HoS = HoS.content.lower()
+
+                        if HoS == "stand":
+                            break
+
+                        elif HoS == "hit":
+                            self.deck.move_cards(player, 1)#give the player a new card
+                            for j, player2 in enumerate(self.players):#reload the embed with player hands
+                                if not player.out:
+                                    embed_players.add_field(name=f"Player {j+1}", value=player2, inline=True)
+                                    await self.players_msg.edit(embed = embed_players)
+
+                        if player.get_value() > 21:
+                            await self.ctx.send(f"Player {i+1} is bust")
+                            break
+                        elif player.get_value() == 21:
+                            await self.ctx.send(f"Player {i+1} has BlackJack!")
+                            player.has_bj = True
+                            break
+
+                    except Exception as e:
+                        print(e)
+                        continue
 
         while self.dealer.get_value() < 17:
             self.deck.move_cards(self.dealer, 1)
-            await self.ctx.send("Dealer")
-            await self.ctx.send(self.dealer)
-            if self.dealer.get_value() > 21:
-                await self.ctx.send("Dealer is bust")
-                break
-            elif self.dealer.get_value() == 21:
-                await self.ctx.send("Dealer has BlackJack!")
-                self.dealer.has_bj = True
+
+        embed_dealer = discord.Embed(title='Dealer', color=0x00ff00)
+        embed_dealer.add_field(name="Hand", value=self.dealer, inline=False)
+        await self.dealer_msg.edit(embed=embed_dealer)    
 
         if_flag = False
         if self.dealer.get_value() > 21:
             for player in self.players:
-                await self.ctx.send(player.get_value())
                 if player.get_value() <= 21:#if they have not gone bust
                     player.credit(2 * player.bet)
             await self.ctx.send("Since Dealer is bust, all players win")
 
-        elif self.dealer.has_bj:
+        elif self.dealer.get_value() == 21:
+            await self.ctx.send("Dealer has BlackJack!")
             for player in self.players:
                 if player.has_bj:
                     player.credit(2 * player.bet)
         else:
             for i, player in enumerate(self.players):
-                if player.has_bj or (player.get_value() < 21 and  player.get_value() > self.dealer.get_value()):
+                if player.has_bj or (player.get_value() < 21 and  player.get_value() > self.dealer.get_value()) and not player.out:
                     if_flag = True
                     await self.ctx.send(f"Player {i+1}, Conrats on winning!")
                     player.credit(2 * player.bet)
-                elif player.get_value() < 21 and  player.get_value() == self.dealer.get_value():
+                elif player.get_value() < 21 and  player.get_value() == self.dealer.get_value() and not player.out:
                     if_flag = True
                     await self.ctx.send(f"Player {i+1}, tied with the dealer!")
                     player.credit(player.bet)
@@ -211,18 +230,21 @@ class BlackJack():
                 await self.ctx.send("House wins")
 
 
-        for player in self.players:
-            if player.coins < 1:
-                await self.ctx.send("Min bet is €1, get your cheap ass out of here")
-                player.out = True
-            elif player.coins > 10000:
-                await self.ctx.send("Dude! You\'re too good, we have to stop you")
-                player.out = True
-            if player.out:
-                self.total_players_out += 1
+        for i, player in enumerate(self.players):
+            if not player.out:
+                player.has_bj = False
+                if player.coins < 1:
+                    await self.ctx.send(f"Player {i+1}, Min bet is €1, get your cheap ass out of here")
+                    player.out = True
+                    self.total_players_out += 1
+                elif player.coins > 10000:
+                    await self.ctx.send(f"Player {i+1}! You\'re too good, we have to stop you")
+                    player.out = True
+                    self.total_players_out += 1
+
 
     async def main(self):
-        while self.total_players_out != len(self.players):
+        while self.total_players_out < len(self.players):
             await self.draw_start()
             await self.round()
         for i, player in enumerate(self.players):
@@ -235,7 +257,7 @@ class Blackjack(commands.Cog):
 
     @commands.command()    
     async def blackjack(self, ctx):
-        bj = BlackJack(1, ctx, self.client)
+        bj = BlackJack(2, ctx, self.client)
         await bj.main()
 
 def setup(client):
