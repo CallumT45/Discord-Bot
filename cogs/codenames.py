@@ -175,13 +175,13 @@ class Codenames(commands.Cog):
         embed_rules.add_field(name='How to Join', value='To play react to this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
-        await msg.add_reaction(emoji = "✅")
-        await asyncio.sleep(20)
+        await msg.add_reaction(emoji = '\U00002705')
+        await asyncio.sleep(15)
 
         cache_msg = discord.utils.get(self.client.cached_messages, id = msg.id)
         reaction = cache_msg.reactions[0]
         users = await reaction.users().flatten()
-        users = [x for x in users if str(x) != 'Test Bot#3617']
+        users = [x for x in users if str(x) != str(self.client.user)]
         if len(users) > 3:
             CN = Codename(ctx, self.client, users)
             await CN.main()
