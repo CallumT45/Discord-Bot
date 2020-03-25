@@ -2,17 +2,18 @@ import discord
 from discord.ext import commands
 import random, asyncio
 
-casts = ['90s', 'apples', 'Base', 'BaseUK', 'Box', 'c-admin', 'c-anime', 'c-antisocial', 'c-derps', 'c-doctorwho', 'c-equinity', 
-'c-eurovision', 'c-fim', 'c-gamegrumps', 'c-golby', 'c-guywglasses', 'c-homestuck', 'c-imgur', 'c-khaos', 'c-ladies', 
-'c-mrman', 'c-neindy', 'c-nobilis', 'c-northernlion', 'c-prtg', 'c-ragingpsyfag', 'c-rpanons', 'c-rt', 'c-socialgamer', 
-'c-sodomydog', 'c-stupid', 'c-tg', 'c-vainglory', 'c-vewysewious', 'c-vidya', 'c-xkcd', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'CAHgrognards', 
-'Canadian', 'crabs', 'fantasy', 'food', 'GOT', 'greenbox', 'HACK', 'hillary', 'HOCAH', 'Image1', 'matrimony', 'mi   await self.ctx.send', 
-'NSFH', 'PAX2015', 'PAXE2013', 'PAXE2014', 'PAXEP2014', 'PAXP2013', 'PAXPP2014', 'period', 'reject', 'reject2', 'science', 'trumpbag', 
-'trumpvote', 'weed', 'www', 'xmas2012', 'xmas2013']
+casts = ['90s', 'apples', 'Base', 'BaseUK', 'c-admin', 'c-anime', 'c-antisocial', 'c-derps', 'c-doctorwho', 
+'c-equinity', 'c-eurovision', 'c-fim', 'c-gamegrumps', 'c-golby', 'c-guywglasses', 'c-homestuck', 
+'c-imgur', 'c-khaos', 'c-ladies', 'c-mrman', 'c-neindy', 'c-nobilis', 'c-northernlion', 'c-prtg', 
+'c-ragingpsyfag', 'c-rpanons', 'c-rt', 'c-socialgamer', 'c-sodomydog', 'c-stupid', 'c-tg', 'c-vewysewious', 
+'c-vidya', 'c-xkcd', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'CAHgrognards', 'Canadian', 'crabs', 
+'fantasy', 'food', 'GOT', 'greenbox', 'HACK', 'hillary', 'HOCAH', 'Image1', 
+'matrimony', 'misprint', 'NSFH', 'period', 'reject', 'reject2', 'science', 'test', 'trumpbag', 'trumpvote', 
+'weed', 'www', 'xmas2012', 'xmas2013']
 
 def remove_newline(text):
 
-    	return text.split('\n')[0]
+    	return text.replace('\n', ' ')
 
 class Player():
     def __init__(self, casts):
@@ -41,14 +42,18 @@ class CAH():
         self.users = users
         self.players = []
         self.max_score = max_score
-        self.casts = ['BaseUK', 'Box','CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'CAHgrognards', 'Canadian', 'crabs', 'fantasy', 'food',
-                     'greenbox', 'HACK', 'hillary', 'HOCAH', 'Image1', 'matrimony', 'NSFH', 'period']
+        self.casts = ['BaseUK','c-ladies','c-stupid', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'crabs','greenbox',  'hillary', 'NSFH', 'period', 'reject2', 'science', 'test', 'trumpbag', 'trumpvote', 'www']
+        self.emojis = ['\u0031\u20E3','\u0032\u20E3','\u0033\u20E3','\u0034\u20E3', '\u0035\u20E3','\u0036\u20E3','\u0037\u20E3','\u0038\u20E3', '\u0039\u20E3']
         self.card_choices = []
         self.hand_updates = 0
+        self.player_accounts = []
+        self.hands = []
+        self.round_count = 0
 
-        for _ in range(len(self.users)):
+        for k in range(len(self.users)):
             pp = Player(self.casts)
             self.players.append(pp)
+            self.player_accounts.append(self.client.get_user(int(self.users[k].id)))
 
     def play_black_card(self):
         black_cards = []
@@ -65,16 +70,26 @@ class CAH():
         for i, card in enumerate(player.cards):
             embed_hand.add_field(name=f"Card {i+1}",value=card, inline=False)
 
-        if self.hand_updates < 1:
-            self.hand = await self.ctx.send(embed=embed_hand)
 
+        
+        if self.hand_updates < 1:
+            self.hand = await self.player_accounts[player_num].send(embed=embed_hand)
+            self.hands.append(self.hand)
         else:
-            await self.hand.edit(embed=embed_hand)
+            await self.hands[player_num].edit(embed=embed_hand)
 
 
     async def round(self):
-        # await self.ctx.send(self.play_black_card())
+        
+        def react_check(msg):
+            def check(reaction, reacting_user):
+                return reacting_user == self.czar and str(reaction.emoji) in self.emojis and reaction.message.id==msg.id
+            return check
+
+        self.czar = self.users[self.round_count%len(self.users)]
+        await self.ctx.send(f"Card Czar is {self.czar.name}")
         self.play_black_card()
+
         if self.black_card_blanks < 2:
             for i, player in enumerate(self.players):
                 await self.send_hand(player, i)
@@ -84,7 +99,7 @@ class CAH():
         else:
             for i, player in enumerate(self.players):
                 player_choices = []
-                await self.ctx.send(player.cards)
+                await self.send_hand(player, i)
                 for j in range(self.black_card_blanks):
                     choice = int(input(f"{self.users[i].name}, what card do you pick?"))
                     player_choices.append(choice-1)
@@ -101,31 +116,44 @@ class CAH():
             else:
                 text = ""
                 for k in range(self.black_card_blanks):
+                    player.draw_card()
                     text += player.play_card(self.card_choices[i][k]) + "\n"
                 embed_main_game.add_field(name=f"{self.users[i].name}",value=text, inline=False)
 
+                    
 
+        
         self.main_card = await self.ctx.send(embed=embed_main_game)
+        for i, answer in enumerate(self.players):
+            await self.main_card.add_reaction(emoji=self.emojis[i])
+    
+        try:
+            reaction, user= await self.client.wait_for('reaction_add', timeout=60.0, check=react_check(self.main_card))
+            winner = self.emojis.index(str(reaction.emoji))
+            self.players[winner-1].score += 1   
+        except Exception as e:
+            print(e)
+            await self.ctx.send("Timed out! No points for anyone!")
 
+        # winner = int(input("Czar, choose your favourite!"))
 
         
-        
-
-        winner = int(input("Czar, choose your favourite!"))
-
-        self.players[winner-1].score += 1
         self.card_choices = []
         self.hand_updates += 1
+        self.round_count += 1
 
     def player_wins(self):
-        for player in self.players:
+        for i, player in enumerate(self.players):
             if player.score == self.max_score:
+                self.winner = i
                 return True
         return False
 
     async def main(self):
         while not self.player_wins():
            await self.round()
+        await self.ctx.send(f"Game Over! Winner was {self.users[self.winner].name}")
+        
 
 
 class CardsAgainstHumanity(commands.Cog):
@@ -144,7 +172,7 @@ class CardsAgainstHumanity(commands.Cog):
 
         msg = await ctx.send(embed=embed_rules)
         await msg.add_reaction(emoji = '\U00002705')
-        await asyncio.sleep(15)
+        await asyncio.sleep(8)
 
         cache_msg = discord.utils.get(self.client.cached_messages, id = msg.id)
         reaction = cache_msg.reactions[0]
