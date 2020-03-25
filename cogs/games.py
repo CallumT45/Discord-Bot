@@ -288,8 +288,7 @@ class Games(commands.Cog):
                 await ctx.send(f"{random.choice(self.congrats)}\nAnswer was: {correct_answer}")
             else:
                 await ctx.send(f"Can't beleive you dont know this, all my bot friends know this!\nAnswer was: {correct_answer}")
-        except Exception as e:
-            await ctx.send(e)
+        except:
             await ctx.send(f"Timed out!\nAnswer was: {correct_answer}")
 
     @commands.command()

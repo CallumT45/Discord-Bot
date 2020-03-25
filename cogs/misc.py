@@ -173,6 +173,7 @@ class Misc(commands.Cog):
                 await ctx.send(file=image, embed=embed_stats)
                 break
             except Exception as e:
+                print(e)
                 continue
 
 
