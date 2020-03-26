@@ -79,6 +79,60 @@ class CAH():
         Send the given player their hand with the black card as title and their score. If this function is not being called for the first time for a player, 
         instead of sending the hand, the hand is instead edited.  
         """
+
+        def react_check(msg):
+            def check(reaction, reacting_user):
+                return reacting_user != self.client.user and str(reaction.emoji) in self.emojis and reaction.message.id==msg.id
+            return check
+
+        embed_hand = discord.Embed(title=f"{self.users[player_num].name}\t\tScore: {player.score}\n{self.black_card}")
+
+        for i, card in enumerate(player.cards):
+            embed_hand.add_field(name=f"Card {i}",value=card, inline=False)
+
+
+        #send to the right player
+        self.hand = await self.player_accounts[player_num].send(embed=embed_hand)
+        #add emojis to hand message
+        for i, card in enumerate(player.cards):
+            await self.hand.add_reaction(emoji=self.emojis[i])
+
+        if self.black_card_blanks < 2:
+            try:
+                reaction, user= await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.hand))
+                choice = self.emojis.index(str(reaction.emoji))
+            except Exception as e:
+                print(e)
+                choice = random.choice(range(10))
+                await self.player_accounts[player_num].send("Timed out! Random card selected")
+            return choice
+        else:
+            player_choices = []
+            for j in range(self.black_card_blanks):
+                try:
+                    reaction, user= await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.hand))
+                    choice = self.emojis.index(str(reaction.emoji))
+                    player_choices.append(choice)
+
+                except Exception as e:
+                    print(e)
+                    choice = random.choice(range(10))
+                    await self.player_accounts[player_num].send("Timed out! Random card selected")
+                    player_choices.append(choice)
+
+            return player_choices
+
+    async def send_hand_edit(self, player, player_num):
+        """
+        Send the given player their hand with the black card as title and their score. If this function is not being called for the first time for a player, 
+        instead of sending the hand, the hand is instead edited.  
+        """
+
+        def react_check(msg):
+            def check(reaction, reacting_user):
+                return str(reaction.emoji) in self.emojis and reaction.message.id==msg.id
+            return check
+
         embed_hand = discord.Embed(title=f"{self.users[player_num].name}\t\tScore: {player.score}\n{self.black_card}")
 
         for i, card in enumerate(player.cards):
@@ -96,6 +150,29 @@ class CAH():
         else:
             await self.hands[player_num].edit(embed=embed_hand)
 
+        if self.black_card_blanks < 2:
+            try:
+                reaction, user= await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.hands[player_num]))
+                choice = self.emojis.index(str(reaction.emoji))
+            except Exception as e:
+                print(e)
+                choice = random.choice(range(10))
+                await self.player_accounts[player_num].send("Timed out! Random card selected")
+            return choice
+        else:
+            player_choices = []
+            for j in range(self.black_card_blanks):
+                try:
+                    reaction, user= await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.hands[player_num]))
+                    choice = self.emojis.index(str(reaction.emoji))
+                    player_choices.append(choice)
+                except Exception as e:
+                    print(e)
+                    choice = random.choice(range(10))
+                    await self.player_accounts[player_num].send("Timed out! Random card selected")
+                    player_choices.append(choice)
+            return player_choices
+
 
     async def round(self):
         
@@ -104,7 +181,8 @@ class CAH():
                 return reacting_user == self.czar and str(reaction.emoji) in self.emojis and reaction.message.id==msg.id
             return check
         #pick Card Czar works in round robin fashion
-        self.czar = self.users[self.round_count%len(self.users)]
+        czar_index = self.round_count%len(self.users)
+        self.czar = self.users[czar_index]
         await self.ctx.send(f"Card Czar is {self.czar.name}")
         self.play_black_card()
 
@@ -114,39 +192,42 @@ class CAH():
         #If only one card is required, for each player, send hand and wait for input
         if self.black_card_blanks < 2:
             for i, player in enumerate(self.players):
-                await self.send_hand(player, i)
-                choice = int(input(f"{self.users[i].name}, what card do you pick?"))
-                self.card_choices.append(choice)
+                if i != czar_index:
+                    choice = await self.send_hand(player, i)
+                    self.card_choices.append(choice)
+                else:
+                    self.card_choices.append(0)
 
         #If more than one card is required, for each player, send hand and wait for inputs, add inputs to a list then append that list to the card_choices list
         else:
             for i, player in enumerate(self.players):
-                player_choices = []
-                await self.send_hand(player, i)
-                for j in range(self.black_card_blanks):
-                    choice = int(input(f"{self.users[i].name}, what card do you pick?"))
-                    player_choices.append(choice)
-                self.card_choices.append(player_choices)
+                if i != czar_index:
+                    player_choices = await self.send_hand(player, i)
+                    self.card_choices.append(player_choices)
+                else:
+                    self.card_choices.append(0)
 
 
         #end_round     
         #Message to be sent to main channel. Title as black card, then player as field name and value as the card they selected. Draw a card from each one submitted.
         for i, player in enumerate(self.players):
-            if self.black_card_blanks < 2:
-                embed_main_game.add_field(name=f"{self.users[i].name}\t\t{self.emojis[i]}",value=player.play_card(self.card_choices[i]), inline=False)
-                player.draw_card()
-            else:
-                text = ""
-                for k in range(self.black_card_blanks):
+            if i != czar_index:
+                if self.black_card_blanks < 2:
+                    embed_main_game.add_field(name=f"{self.users[i].name}\t\t{self.emojis[i]}",value=player.play_card(self.card_choices[i]), inline=False)
                     player.draw_card()
-                    text += player.play_card(self.card_choices[i][k]) + "\n"
-                embed_main_game.add_field(name=f"{self.users[i].name}",value=text, inline=False)              
+                else:
+                    text = ""
+                    for k in range(self.black_card_blanks):
+                        player.draw_card()
+                        text += player.play_card(self.card_choices[i][k]) + "\n"
+                    embed_main_game.add_field(name=f"{self.users[i].name}",value=text, inline=False)              
 
         # self.main_card = await self.ctx.send(embed=embed_main_game)
         await self.main_card.edit(embed=embed_main_game)
         
         for i, answer in enumerate(self.players):
-            await self.main_card.add_reaction(emoji=self.emojis[i])
+            if i != czar_index:
+                await self.main_card.add_reaction(emoji=self.emojis[i])
     
         try:
             reaction, user= await self.client.wait_for('reaction_add', timeout=60.0, check=react_check(self.main_card))
@@ -199,11 +280,11 @@ class CardsAgainstHumanity(commands.Cog):
         reaction = cache_msg.reactions[0]
         users = await reaction.users().flatten()
         users = [x for x in users if str(x) != str(self.client.user)]
-        if 0 < len(users) < 9:
+        if 1 < len(users) < 9:
             game = CAH(ctx, self.client, 2, users)
             await game.main()
         else:
-            await ctx.send("Game requires 1 to 8 players!")
+            await ctx.send("Game requires 3 to 8 players!")
 
 
 

@@ -21,6 +21,7 @@ class Hangman():
         self.cg= ["_"]*len(self.split_wtg)#prints a list the length of the hidden word
         self.letters_left="a b c d e f g h i j k l m n o p q r s t u v w x y z".split()
         self.congrats = congrats
+        self.rounds = 0
 
     def game(self, guess):
         """iterates through the split word and if the letter guess is at that element then place that letter in the 
@@ -53,7 +54,7 @@ class Hangman():
         await self.ctx.send(f"Word has {len(self.cg)} letters")
         while self.cg!=self.split_wtg:#While guessed word is not equal to the hidden word 
             try:
-                await self.ctx.send("Choose your letter")
+                # await self.ctx.send("Choose your letter")
 
                 try:
                     guess = await self.client.wait_for('message', timeout=45.0, check=letter_check)
@@ -71,11 +72,15 @@ class Hangman():
                 embed.add_field(name="Lives", value=self.lives, inline=False)
                 embed.add_field(name="Current Guess", value=self.string_format2(self.cg), inline=False)
 
-                await self.ctx.send(embed=embed)
+                if self.rounds % 5 == 0:
+                    self.hangman_msg = await self.ctx.send(embed=embed)
+                else:
+                    await self.hangman_msg.edit(embed=embed)
 
                 if self.lives == 0:
                     await self.ctx.send(f"Word was {self.word_to_guess}")
                     break#break the inside game loop, prompts the user to play again
+                self.rounds += 1
             except Exception as e:
                 # print(e)
                 continue
