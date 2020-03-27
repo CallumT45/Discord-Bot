@@ -4,17 +4,17 @@ import random, asyncio
 
 
 class PlayingCard():
+    """
+    Playing Card class so that cards may be sorted and printing appropriately
+    """
     rank_num = {'Ace':14,'King':13,'Queen':12,'Jack':11,10:10,9:9,8:8,7:7,6:6,5:5,4:4,3:3,2:2}
 
     def __init__(self,r,s):
         self.suit = s
         self.rank = r
 
-
     def __lt__(self,other):
         return (self.suit, self.rank_num[self.rank]) < (other.suit, self.rank_num[other.rank])
-
-
 
     def __str__(self):
         return self.suit  + " " + str(self.rank)
@@ -78,8 +78,14 @@ class Deck(object):
         return text
 
 class Player(Deck):
-    """Represents a hand of playing cards."""
-    
+    """Represents a player at the table.
+    Attributes:
+    cards: list of Card objects.
+    has_bj: boolean, if the player has blackjack
+    coins: starting credit
+    bet: how much the player has bet
+    out: boolean, if the player is out of the game
+    """
     def __init__(self):
         self.cards = []
         self.has_bj = False
@@ -88,6 +94,9 @@ class Player(Deck):
         self.out = False
 
     def get_value(self):
+        """
+        returns the value of a players hand, if the value exceeds 21, checks to see if player has an Ace, if so changes value of Ace to 1
+        """
         bj_rankings = {'Ace':11, 'King':10, 'Queen':10, 'Jack':10, 10:10, 9:9, 8:8, 7:7, 6:6, 5:5, 4:4, 3:3, 2:2}
         value = 0
         for card in self.cards:
@@ -110,7 +119,15 @@ class Player(Deck):
         self.cards = [] 
 
 class BlackJack():
-    
+    """Represents a game of blackjack.
+    Attributes:
+    players: list of Player objects.
+    deck: all the cards in the game, Deck(6) means 6 decks of 52 cards
+    dealer: Player object representing dealer
+    total_players_out: How many players are out, if all out then game is over
+    client and ctx: used for discord interaction
+    users: list of users with their profile information playing the game
+    """    
     def __init__(self, num_players, ctx, client, users):
         self.players = []
         self.deck = Deck(6)#using 6 decks as per casino standard
@@ -125,8 +142,12 @@ class BlackJack():
 
 
     async def draw_start(self):
+        """
+        For each player in the game if they are not out, how much do they want to bet, if they bet nothing they are out, otherwise debit the amount and set player.bet
+        """
         for i, player in enumerate(self.players):
             def bet_check(m):
+                """If the value can be converted to a float and is within the bounds return true, else false"""
                 try:
                     value = float(m.content)
                     if 0 <= value <= player.coins:
@@ -134,6 +155,7 @@ class BlackJack():
                     else: return False
                 except:
                     return False
+
             if not player.out:
                 await self.ctx.send(f"{self.users[i].name}, How much would you like to bet? You have {player.coins} in the bank: ")
                 try:
@@ -149,7 +171,7 @@ class BlackJack():
                     await self.ctx.send("Timed Out!")
                     player.out = True
                     self.total_players_out += 1
-
+        #shuffle cards and dealer draws one, send the dealers hand to the channel, loop through all players that aren't out and show their hand
         if self.total_players_out < len(self.players):#if all players arent out
             self.deck.shuffle()
             self.dealer.clear()
@@ -164,16 +186,23 @@ class BlackJack():
                 if not player.out:
                     player.clear()
                     self.deck.move_cards(player, 2)
-                    embed_players.add_field(name=self.users[i].name, value=player, inline=True)
+                    embed_players.add_field(name=self.users[i].name, value=player, inline=True)#name=their discord name and value = their hand
                     if player.get_value() == 21:
                         player.has_bj = True
             self.players_msg = await self.ctx.send(embed = embed_players)
 
     async def round(self):
+        """
+        First loop through all the players that aren't out, ask them if they would like to hit or stand, if stand, break the loop and move on to the next player.
+        If hit, player draws another card and redraw the card embed, then edit the previous one with the new values. Check if player is bust or has blackjack at the 
+        end of each loop.
 
+        Then while the dealer has less than 17 total value, keep drawing cards.
+
+        """
         def turn_check(m):
             return (m.content.lower() == 'stand') or (m.content.lower() == 'hit')
-
+        #Players
         for i, player in enumerate(self.players):
             if not player.out:
                 HoS = ''
@@ -206,6 +235,8 @@ class BlackJack():
                         print(e)
                         continue
 
+
+        #Dealer
         while self.dealer.get_value() < 17:
             self.deck.move_cards(self.dealer, 1)
 
@@ -213,25 +244,26 @@ class BlackJack():
         embed_dealer.add_field(name="Hand", value=self.dealer, inline=False)
         await self.dealer_msg.edit(embed=embed_dealer)    
 
-        if_flag = False
-        if self.dealer.get_value() > 21 and self.total_players_out < len(self.players):
+        #Checks
+        if self.dealer.get_value() > 21 and self.total_players_out < len(self.players):#if dealer is bust and not all players are out
             for player in self.players:
-                if player.get_value() <= 21 and not player.out:#if they have not gone bust
+                if player.get_value() <= 21 and not player.out:#if player is not bust and is not out
                     player.credit(2 * player.bet)
             await self.ctx.send("Since Dealer is bust, all players win")
 
-        elif self.dealer.get_value() == 21 and self.total_players_out < len(self.players):
+        elif self.dealer.get_value() == 21 and self.total_players_out < len(self.players):#Dealer has blackjack
             await self.ctx.send("Dealer has BlackJack!")
             for player in self.players:
                 if player.has_bj and not player.out:
                     player.credit(2 * player.bet)
         else:
+            if_flag = False#Used to check if any of the if statements are activated.
             for i, player in enumerate(self.players):
-                if player.has_bj or (player.get_value() < 21 and  player.get_value() > self.dealer.get_value()) and not player.out:
+                if player.has_bj or (player.get_value() < 21 and  player.get_value() > self.dealer.get_value()) and not player.out:#if player has blacjack or beat the dealer and not out
                     if_flag = True
                     await self.ctx.send(f"{self.users[i].name}, Conrats on winning!")
                     player.credit(2 * player.bet)
-                elif player.get_value() < 21 and  player.get_value() == self.dealer.get_value() and not player.out:
+                elif player.get_value() < 21 and  player.get_value() == self.dealer.get_value() and not player.out:#if player not bust and tied with dealer
                     if_flag = True
                     await self.ctx.send(f"{self.users[i].name}, tied with the dealer!")
                     player.credit(player.bet)
@@ -239,6 +271,7 @@ class BlackJack():
                 await self.ctx.send("House wins")
 
 
+        #end of round cleanup
         for i, player in enumerate(self.players):
             if not player.out:
                 player.has_bj = False
