@@ -2,14 +2,6 @@ import discord
 from discord.ext import commands
 import random, asyncio
 
-casts = ['90s', 'apples', 'Base', 'BaseUK', 'c-admin', 'c-anime', 'c-antisocial', 'c-derps', 'c-doctorwho', 
-'c-equinity', 'c-eurovision', 'c-fim', 'c-gamegrumps', 'c-golby', 'c-guywglasses', 'c-homestuck', 
-'c-imgur', 'c-khaos', 'c-ladies', 'c-mrman', 'c-neindy', 'c-nobilis', 'c-northernlion', 'c-prtg', 
-'c-ragingpsyfag', 'c-rpanons', 'c-rt', 'c-socialgamer', 'c-sodomydog', 'c-stupid', 'c-tg', 'c-vewysewious', 
-'c-vidya', 'c-xkcd', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'CAHgrognards', 'Canadian', 'crabs', 
-'fantasy', 'food', 'GOT', 'greenbox', 'HACK', 'hillary', 'HOCAH', 'Image1', 
-'matrimony', 'misprint', 'NSFH', 'period', 'reject', 'reject2', 'science', 'test', 'trumpbag', 'trumpvote', 
-'weed', 'www', 'xmas2012', 'xmas2013']
 
 def remove_newline(text):
 
@@ -48,19 +40,22 @@ class CAH():
         self.users = users
         self.players = []
         self.max_score = max_score
-        self.casts = ['BaseUK','c-ladies','c-stupid', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'crabs','greenbox',  'hillary', 'NSFH', 'period', 'reject2', 'science', 'test', 'trumpbag', 'trumpvote', 'www']
         self.emojis = ['\u0030\u20E3','\u0031\u20E3','\u0032\u20E3','\u0033\u20E3','\u0034\u20E3', '\u0035\u20E3','\u0036\u20E3','\u0037\u20E3','\u0038\u20E3', '\u0039\u20E3']
         self.card_choices = []
         self.hand_updates = 0
         self.player_accounts = []
         self.hands = []
         self.round_count = 0
-
+        self.casts = ['BaseUK', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'CAHe7', 'CAHe8', 'greenbox', 'Ireland']
         #For as many players as is given, create a player instance and save that users account information
         for k in range(len(self.users)):
             pp = Player(self.casts)
             self.players.append(pp)
             self.player_accounts.append(self.client.get_user(int(self.users[k].id)))
+
+    def add_card_cast(self, cast):
+        if not cast in self.all_card_casts:
+            self.casts.append()
 
     def play_black_card(self):
         """
