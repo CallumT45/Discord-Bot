@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import requests, html, random, json
+import requests, html, random, json, asyncio
 
 
 
@@ -98,6 +98,7 @@ class TicTacToe():
         self.player_letter = player_letter
         self.ctx = ctx
         self.client = client
+        self.rounds = 0
         self.letter_dict = {'X': '\u274C','O': '\u2B55'}
         if PvP:
             self.player2_letter = self.other_letter(player_letter)
@@ -106,7 +107,26 @@ class TicTacToe():
 
     async def drawBoard(self):
         """Prints the board in the correct format"""
-        await self.ctx.send('| ' + self.board[7] + ' | ' + self.board[8] + ' | ' + self.board[9] + ' |\n| ' + self.board[4] + ' | ' + self.board[5] + ' | ' + self.board[6] + ' |\n| ' + self.board[1] + ' | ' + self.board[2] + ' | ' + self.board[3] + ' |')
+        tic_embed = discord.Embed(title='TicTacToe', color=0x00ff00)
+        tic_embed.add_field(name=".", value=self.board[7], inline=True)
+        tic_embed.add_field(name=".", value=self.board[8], inline=True)
+        tic_embed.add_field(name=".", value=self.board[9], inline=True)
+        tic_embed.add_field(name=".", value=self.board[4], inline=True)
+        tic_embed.add_field(name=".", value=self.board[5], inline=True)
+        tic_embed.add_field(name=".", value=self.board[6], inline=True)
+        tic_embed.add_field(name=".", value=self.board[1], inline=True)
+        tic_embed.add_field(name=".", value=self.board[2], inline=True)
+        tic_embed.add_field(name=".", value=self.board[3], inline=True)
+
+        if self.rounds < 1:
+            self.game_board = await self.ctx.send(embed=tic_embed)
+            for i in range(9):
+                await self.game_board.add_reaction(emoji=self.board[1:][i])
+        else:
+            await self.game_board.edit(embed=tic_embed)
+
+
+
 
     def player_move(self, move, letter):
         """Updates the board with the players turn, removes that option from turns"""
@@ -144,7 +164,7 @@ class TicTacToe():
             if self.victory(test_board):
                 self.board[self.turns[i]] = self.letter_dict[self.comp_letter]#if victory update the board and remove from turns list    
                 self.turns.remove(self.turns[i])
-                await self.drawBoard()
+                # await self.drawBoard()
                 return
         #checking for blocking move for comp
         for i in range(len(self.turns)):
@@ -153,14 +173,14 @@ class TicTacToe():
             if self.victory(test_board):
                 self.board[self.turns[i]] = self.letter_dict[self.comp_letter]#if victory update the board and remove from turns list    
                 self.turns.remove(self.turns[i])
-                await self.drawBoard()
+                # await self.drawBoard()
                 return
 
 
         comp = random.choice(self.turns)#turns keeps track of options we have left, this line randomly chooses
         self.board[comp] = self.letter_dict[self.comp_letter]
         self.turns.remove(comp)
-        await self.drawBoard()
+        # await self.drawBoard()
 
 
         
@@ -168,46 +188,52 @@ class TicTacToe():
     async def mainGame(self):
         def move_check(m):
             return (m.content in list(map(lambda x: str(x), self.turns))  or m.content.lower() == "stop")
+
+        def react_check(msg):
+            def check(reaction, reacting_user):
+                return reacting_user != self.client.user and str(reaction.emoji) in self.board and reaction.message.id==msg.id and self.board.index(str(reaction.emoji)) in self.turns
+            return check
         flag = True
         while flag:#while no victory is determined or while there are turns left to make
-            
-            await self.ctx.send("Choose your spot\n")
+            self.rounds += 1
+            # await self.ctx.send("Choose your spot\n")
 
             try:
-                move = await self.client.wait_for('message', timeout=45.0, check=move_check)
-
+                # move = await self.client.wait_for('message', timeout=45.0, check=move_check)
+                reaction, user= await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.game_board))
+                move = self.board.index(str(reaction.emoji))
             except:
                 await self.ctx.send('Timed Out!')
                 break
 
-
-            if move.content == "stop":
-                flag = False
             else:
-                self.player_move(int(move.content), self.player_letter)
+                self.player_move(int(move), self.player_letter)
+                await self.drawBoard()
                 if self.turns == []  or self.victory(self.board):
                     #if no moves left or victory reached, otherwise computers turn
                     flag = False
                     await self.drawBoard()
                 else:
-
+                    await asyncio.sleep(0.5)
                     await self.comp_move_ai()
+                    await self.drawBoard()
                     if self.turns == []  or self.victory(self.board):
                         flag = False
-
+            
         await self.ctx.send("Game Over!")
 
     async def player_move_code(self, player):
-        def move_check(m):
-            return m.content in list(map(lambda x: str(x), self.turns))
-
-        await self.ctx.send("{} choose your spot\n".format(player))
+        def react_check(msg):
+            def check(reaction, reacting_user):
+                return reacting_user != self.client.user and str(reaction.emoji) in self.board and reaction.message.id==msg.id and self.board.index(str(reaction.emoji)) in self.turns
+            return check
 
         try:
-            move = await self.client.wait_for('message', timeout=45.0, check=move_check)
+            reaction, user= await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.game_board))
+            move = self.board.index(str(reaction.emoji))
             return move
         except Exception as e:
-            await self.ctx.send(e)
+            print(e)
             await self.ctx.send('Timed Out!')
             flag = False
 
@@ -217,17 +243,17 @@ class TicTacToe():
         flag = True
         move = ""
         while flag:#while no victory is determined or while there are turns left to make
-            
+            self.rounds += 1
             move = await self.player_move_code("Player 1")
 
-            self.player_move(int(move.content), self.player_letter)
+            self.player_move(int(move), self.player_letter)
             await self.drawBoard()
             if self.turns == []  or self.victory(self.board):
                 #if no moves left or victory reached, otherwise computers turn
                 flag = False
             else:
                 move = await self.player_move_code("Player 2")
-                self.player_move(int(move.content), self.player2_letter)
+                self.player_move(int(move), self.player2_letter)
                 await self.drawBoard()
                 if self.turns == []  or self.victory(self.board):
                     flag = False
@@ -302,9 +328,8 @@ class Games(commands.Cog):
             It's TicTacToe! Now with PvP
 
         """
-
-
         emojis = ['\u0031\u20E3','\u0032\u20E3']
+        letters = {'X': '\u274C','O': '\u2B55'}
         embed_tac = discord.Embed(title='How many players?', color=0x00ff00)
         player_count = await ctx.send(embed=embed_tac)
 
@@ -326,9 +351,8 @@ class Games(commands.Cog):
                 return (m.content.upper() == 'X' or m.content.upper() == 'O')
 
             try:
-                await ctx.send('Do you want to be X or O?')
-                msg = await self.client.wait_for('message', timeout=45.0, check=check)
-                letter = msg.content.upper()
+                letter = random.choice([*letters])
+                await ctx.send(f"You are {letters[letter]}")
                 tttGame = TicTacToe(letter,ctx, self.client, PvP)
                 await tttGame.drawBoard()
                 if PvP:
