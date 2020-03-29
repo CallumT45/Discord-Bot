@@ -217,7 +217,6 @@ class CAH():
                         text += player.play_card(self.card_choices[i][k]) + "\n"
                     embed_main_game.add_field(name=f"{self.users[i].name}",value=text, inline=False)              
 
-        # self.main_card = await self.ctx.send(embed=embed_main_game)
         await self.main_card.edit(embed=embed_main_game)
         
         for i, answer in enumerate(self.players):
@@ -231,8 +230,6 @@ class CAH():
         except Exception as e:
             print(e)
             await self.ctx.send("Timed out! No points for anyone!")
-
-        # winner = int(input("Czar, choose your favourite!"))
 
         #reset card_choices and increment hand_updates and round_count
         self.card_choices = []
@@ -275,7 +272,7 @@ class CardsAgainstHumanity(commands.Cog):
         reaction = cache_msg.reactions[0]
         users = await reaction.users().flatten()
         users = [x for x in users if str(x) != str(self.client.user)]
-        if 1 < len(users) < 9:
+        if 2 < len(users) < 9:
             game = CAH(ctx, self.client, 2, users)
             await game.main()
         else:

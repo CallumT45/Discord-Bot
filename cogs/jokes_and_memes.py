@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands
-import praw, random, io, asyncio, urllib, json, requests, html
+import praw, random, io, asyncio, urllib, json, requests
 
 from urllib.request import Request, urlopen
-from PIL import Image, ImageDraw, ImageFont
 
 with open('files/credentials.txt', 'r') as credfile:
     credentials = json.load(credfile)
@@ -53,7 +52,29 @@ class Jokes_and_Memems(commands.Cog):
                         imgURL = submission.url
                         raw_data = urllib.request.urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
-                        await ctx.send(raw_post, file=discord.File(im, "funny_meme.png"))
+                        await ctx.send(raw_post, file=discord.File(im, "funny_meme.gif"))
+                        break
+                    except Exception as e: 
+                        print(e)
+                        continue
+                else:
+                    post_to_pick += 1
+
+
+    @commands.command()
+    async def eyebleach(self, ctx):
+        """Grabs one of the hot posts from r/eyebleach and displays it in the chat"""
+        subreddit = 'eyebleach'
+        post_to_pick = random.randint(0, 15)
+        for count, submission in enumerate(reddit.subreddit(subreddit).top(random.choice(["day", "week", "month"]))):
+            if count == post_to_pick:
+                if not submission.stickied and not submission.is_video and submission.is_reddit_media_domain:
+                    try:
+                        raw_post = str(submission.title) + " \u2191 " + str(submission.score) + "  r/" + str(subreddit)
+                        imgURL = submission.url
+                        raw_data = urllib.request.urlopen(imgURL).read()
+                        im = io.BytesIO(raw_data)
+                        await ctx.send(raw_post, file=discord.File(im, "aww.gif"))
                         break
                     except: continue
                 else:
@@ -87,6 +108,62 @@ class Jokes_and_Memems(commands.Cog):
         else:
             await ctx.send(json_data[0]['setup'])
             await ctx.send(json_data[0]['punchline'])
+    
+    @commands.command()
+    async def distracted(self, ctx, text0, text1):        
+        """
+            Generate a Distracted Boyfriend meme, Call command followed by text in quotes, then a space and the second text in quotes
+        """
+        URL = 'https://api.imgflip.com/caption_image'
+        params = {
+            'username':credentials['ids']['reddit']['username'],
+            'password':credentials['ids']['reddit']['password'],
+            'template_id':'112126428',
+            'text0':text0,
+            'text1':text1
+        }
+        response = requests.request('POST',URL,params=params).json()
+        imgURL = response['data']['url']
+        response = requests.get(imgURL)
+        im = io.BytesIO(response.content)
+        await ctx.send(file=discord.File(im, "meme.png"))
+
+    @commands.command()
+    async def hotline(self, ctx, text0, text1):        
+        """
+            Generate a Hotline bling meme, Call command followed by text in quotes, then a space and the second text in quotes
+        """
+        URL = 'https://api.imgflip.com/caption_image'
+        params = {
+            'username':credentials['ids']['reddit']['username'],
+            'password':credentials['ids']['reddit']['password'],
+            'template_id':'181913649',
+            'text0':text0,
+            'text1':text1
+        }
+        response = requests.request('POST',URL,params=params).json()
+        imgURL = response['data']['url']
+        response = requests.get(imgURL)
+        im = io.BytesIO(response.content)
+        await ctx.send(file=discord.File(im, "meme.png"))
+
+    @commands.command()
+    async def cmm(self, ctx, text0):        
+        """
+            Generate a Change my Mind meme, Call command followed by text in quotes
+        """
+        URL = 'https://api.imgflip.com/caption_image'
+        params = {
+            'username':credentials['ids']['reddit']['username'],
+            'password':credentials['ids']['reddit']['password'],
+            'template_id':'129242436',
+            'text0':text0
+        }
+        response = requests.request('POST',URL,params=params).json()
+        imgURL = response['data']['url']
+        response = requests.get(imgURL)
+        im = io.BytesIO(response.content)
+        await ctx.send(file=discord.File(im, "meme.png"))
 
 
 def setup(client):

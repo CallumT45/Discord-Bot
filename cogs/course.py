@@ -68,10 +68,10 @@ class Course(commands.Cog):
                 return False
 
         def assignment_check(m):
-            return m.author == ctx.author
+            return m.author == ctx.author and m.guild == ctx.guild
 
         def assignment_date_check(m):
-            return dateValidate(m.content) and m.author == ctx.author
+            return dateValidate(m.content) and m.author == ctx.author and m.guild == ctx.guild
 
         try:
             msg2 = await self.client.wait_for('message', timeout=45.0, check=assignment_check)
@@ -116,7 +116,7 @@ class Course(commands.Cog):
             else: return False
 
         def assignment_check_remove(m):
-            return detValidate(m.content, lines) and m.author == ctx.author
+            return detValidate(m.content, lines) and m.author == ctx.author and m.guild == ctx.guild
         try:
             msg3 = await self.client.wait_for('message', timeout=60.0, check=assignment_check_remove)
             assignment_details_remove = msg3.content

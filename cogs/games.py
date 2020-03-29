@@ -50,7 +50,7 @@ class Hangman():
 
     async def maingame(self):
         def letter_check(m):
-            return (m.content in self.letters_left or m.content.lower() == "stop")
+            return (m.content in self.letters_left or m.content.lower() == "stop") and m.guild == self.ctx.guild
         await self.ctx.send(f"Word has {len(self.cg)} letters")
         while self.cg!=self.split_wtg:#While guessed word is not equal to the hidden word 
             try:

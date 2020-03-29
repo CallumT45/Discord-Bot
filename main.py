@@ -64,9 +64,60 @@ async def deadline():
             print(e)
             await asyncio.sleep(20000)
 
+async def problem():
+    await client.wait_until_ready()
+    channel = client.get_channel(credentials['ids']['discord']['main_channel_id'])#change this to whatever id you need
+    while not client.is_closed():
+        try:
+            with open('files/problems.json', 'r') as credfile:
+                problems = json.load(credfile)
+
+                num = random.randint(0, 1021)
+
+                embed_problem = discord.Embed(title="Daily Problem " +problems[str(num)]['title'].upper(), color=0x00ff00)
+
+                embed_problem.add_field(name = 'Problem', value=problems[str(num)]['problem'], inline=False)
+                embed_problem.add_field(name = "Examples", value=problems[str(num)]['example'], inline=False)
+                embed_problem.add_field(name = "Link", value="https://leetcode.com/problems/" + problems[str(num)]['title'], inline=False)
+                await channel.send(embed=embed_problem)      
+                await asyncio.sleep(86400)
+        except Exception as e:
+            print(e)
+            await asyncio.sleep(30)
+
+async def update_covid():
+    await client.wait_until_ready()
+    while not client.is_closed():
+        try:
+            response = requests.get("https://thevirustracker.com/free-api?countryTotal=IE", headers={'Accept-Encoding': 'deflate','User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"})
+
+            x = json.loads(response.text)
+
+            total_cases = x["countrydata"][0]['total_cases']
+            # define an empty list
+            cases = []
+            # open file and read the content in a list
+            with open('files/casefile.txt', 'r') as filehandle:
+                for line in filehandle:
+                    # remove linebreak which is the last character of the string
+                    currentPlace = line[:-1]
+                    cases.append(int(currentPlace))
+            if cases[-1] != total_cases:
+                cases.append(total_cases)
+
+            with open('files/casefile.txt', 'w') as filehandle:
+                for listitem in cases:
+                    filehandle.write('{}\n'.format(listitem))
+
+            await asyncio.sleep(86400)
+        except Exception as e:
+            print(e)
+            await asyncio.sleep(1500)
+
+
 def check_if_it_is_me(ctx):
     return ctx.message.author.id == 307625115963621377 or ctx.message.author.id == 618791421432037386
-
+ 
 @client.event
 async def on_ready():
     print('Bot is ready')
@@ -115,4 +166,6 @@ async def on_reaction_add(reaction, user):
 
 
 client.loop.create_task(deadline())
+client.loop.create_task(problem())
+client.loop.create_task(update_covid())
 client.run(credentials['ids']['discord']['server_id'])

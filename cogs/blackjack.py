@@ -201,7 +201,7 @@ class BlackJack():
 
         """
         def turn_check(m):
-            return (m.content.lower() == 'stand') or (m.content.lower() == 'hit')
+            return ((m.content.lower() == 'stand') or (m.content.lower() == 'hit')) and m.guild == self.ctx.guild
         #Players
         for i, player in enumerate(self.players):
             if not player.out:
