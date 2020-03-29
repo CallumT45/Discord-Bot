@@ -6,6 +6,8 @@ __Version 3.0__
 
 Three new games added including Cards Against Humanity. Ability to create memes such as Change my Mind and Distracted Boyfriend. Leetcode problem is now called daily and Covid updates daily in the background. Added calculator and xkcd functions aswell. Hangman and TicTacToe were updated to reduce bot spam.
 
+Known issue: No catch for large files in $dankmeme
+
 __Commands__
 
 MScBot has a lot of features, split into 4 categories. Each commmand is called with a $:
