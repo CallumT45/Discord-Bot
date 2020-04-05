@@ -8,6 +8,7 @@ class werewolf():
         self.set_roles()
         self.ctx = ctx
         self.client = client
+
         # self.show_werewolfs()#Method to provately send list of werewolves to the other werewolves at the start of the game
 
 
@@ -35,7 +36,6 @@ class werewolf():
         self.cupid = self.villagers_with_roles[2]
         self.role_dict[self.villagers_with_roles[2]] = "Cupid"
 
-
         if num > 9:
             self.hunter = self.villagers_with_roles[3]
             self.role_dict[self.villagers_with_roles[3]] = "Hunter"
@@ -43,15 +43,21 @@ class werewolf():
         for villager in self.villagers_without_roles:
             self.role_dict[villager] = "Villager"
 
+
+
     async def night(self):
         self.cycle = "night"
         await self.draw_users()
-        werewolf_choice = int(input("Werewolves choose who you will kill: "))
-        doc_choice = int(input("Doctor choose who you will save: "))
-        seer_choice = int(input("Seer choose who you will look at: "))
 
-        await self.ctx.send(str(self.users[seer_choice]) + " is " + str(self.role_dict[self.users[seer_choice]]))
 
+        await self.ctx.send("Werewolves are choosing their next meal")
+        werewolf_choice = await self.killer_turn()
+
+        await self.ctx.send("Doctor is choosing")
+        doc_choice = await self.doc_turn()
+
+        await self.ctx.send("Seer is choosing")
+        await self.seer_turn()
 
         if werewolf_choice != doc_choice:
             await self.ctx.send(f"{self.users[werewolf_choice]} was brutally mauled to death last night")
@@ -60,21 +66,36 @@ class werewolf():
             await self.ctx.send(f"{self.users[werewolf_choice]} was attacked last night, but the doctor managed to save them")
 
     async def day(self):
+        def mob_check(m):
+            return (m.content in list(map(lambda x: str(x), range(len(self.users)))))
+
         self.cycle = "day"
-        await self.draw_users()
-        #need to plan for tie
-        lynch_choice = int(input("You have 5 minutes to decide who to lynch!\n"))
-        #do the wait thing for 5 mins
-        await self.ctx.send(f"{self.users[lynch_choice]} was put to death")
-        await self.remove_user(lynch_choice)
+        embed_users = await self.draw_users()
+        await self.ctx.send(embed=embed_users)
+
+        await self.ctx.send("You have 5 minutes to decide who to lynch!")
+
+        try:
+            lynch_choice = await self.client.wait_for('message', timeout=300.0, check=mob_check)
+            lynch_choice =  int(lynch_choice.content)
+            await self.ctx.send(f"{self.users[lynch_choice]} was put to death")
+            await self.remove_user(lynch_choice)
+
+        except Exception as e:
+            print(e)
+            await self.ctx.send("Timed Out!")
+            
+
+
 
     async def remove_user(self, index):
         if self.role_dict[self.users[index]] == "Werewolf":
             self.num_wolves -= 1
         elif self.role_dict[self.users[index]] == "Hunter" and self.cycle == "day":
-            hunter_choice = int(input("Hunter choose who you will kill: "))
+            hunter_choice = await self.killer_turn()
             await self.ctx.send(f"Just before being put to death, the hunter killed {self.users[hunter_choice]}")
-            await self.remove_user(hunter_choice)           
+            await self.remove_user(hunter_choice) 
+
         if self.users[index] in self.cupid_choice:
             self.cupid_choice.remove(self.users[index])
             await self.ctx.send(f"Overcome with grief by the loss of {self.users[index]}, {self.cupid_choice[0]} killed themself!")
@@ -101,7 +122,6 @@ class werewolf():
 
         try:
             cupid_choice = await self.client.wait_for('message', timeout=45.0, check=cupid_check)
-            print(cupid_choice.content)
             self.cupid_choice = [self.users[int(i)] for i in cupid_choice.content]
         except Exception as e:
             print(e)
@@ -109,10 +129,9 @@ class werewolf():
 
     async def doc_turn(self):
         def doc_check(m):
-            return (m.content in range(len(self.users)))
+            return (m.content in list(map(lambda x: str(x), range(len(self.users)))))
             
-        await self.ctx.send("Doctor is choosing")
-        # cupid_id = self.client.get_user(int(self.cupid.id))
+        # docotor_id = self.client.get_user(int(self.doc.id))
         embed_users = await self.draw_users()
         await self.ctx.send(embed=embed_users)
 
@@ -120,16 +139,57 @@ class werewolf():
 
         try:
             doc_choice = await self.client.wait_for('message', timeout=45.0, check=doc_check)
-            print(doc_choice.content)
-            return doc_choice.content
+            return int(doc_choice.content)
+        except Exception as e:
+            print(e)
+            await self.ctx.send("Timed Out!")
+            return -1
+
+    async def seer_turn(self):
+        def seer_check(m):
+            return (m.content in list(map(lambda x: str(x), range(len(self.users)))))
+            
+        
+        # cupid_id = self.client.get_user(int(self.cupid.id))
+        embed_users = await self.draw_users()
+        await self.ctx.send(embed=embed_users)
+
+        await self.ctx.send("Seer choose who you want to peek at")
+
+        try:
+            seer_choice = await self.client.wait_for('message', timeout=45.0, check=seer_check)
+            user = self.users[int(seer_choice.content)]
+            await self.ctx.send(str(user) + " is " + str(self.role_dict[user]))
         except Exception as e:
             print(e)
             await self.ctx.send("Timed Out!")
 
+    async def killer_turn(self):
+        def killer_check(m):
+            return (m.content in list(map(lambda x: str(x), range(len(self.users)))))
+         
+        # cupid_id = self.client.get_user(int(self.cupid.id))
+        embed_users = await self.draw_users()
+        await self.ctx.send(embed=embed_users)
+        #send to all werewolves, but only get response from one
+        while True:
+            try:
+                killer_choice = await self.client.wait_for('message', timeout=45.0, check=killer_check)
+                return int(killer_choice.content)
+            except Exception as e:
+                print(e)
+                await self.ctx.send("Timed Out!, Choose a victim")
+                continue
+                
+
+
+
     async def main(self):
+        # for user in self.users:
+        #     await self.ctx.send(self.role_dict[user])
+
         await self.cupid_turn()
         while self.num_wolves > 0 and (2 * self.num_wolves != len(self.users)):
-            print(self.users) 
             await self.night()
             await self.day()
         if self.num_wolves == 0:
@@ -157,7 +217,7 @@ class Werewolf(commands.Cog):
     @commands.command()    
     async def werewolf(self, ctx):
         ww = werewolf(ctx, self.client)#, users)
-        print(ww.role_dict)
+        # print(ww.role_dict)
         await ww.main()
 
 def setup(client):
