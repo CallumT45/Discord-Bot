@@ -54,10 +54,18 @@ class werewolf():
         werewolf_choice = await self.killer_turn()
 
         await self.ctx.send("Doctor is choosing")
-        doc_choice = await self.doc_turn()
+        if self.doc in self.users:
+            doc_choice = await self.doc_turn()
+        else:
+            await asyncio.sleep(random.randint(3,8))
+            doc_choice = -1
 
         await self.ctx.send("Seer is choosing")
-        await self.seer_turn()
+        if self.seer in self.users:
+            await self.seer_turn()
+        else:
+            await asyncio.sleep(random.randint(3,8))
+
 
         if werewolf_choice != doc_choice:
             await self.ctx.send(f"{self.users[werewolf_choice]} was brutally mauled to death last night")
@@ -91,7 +99,9 @@ class werewolf():
     async def remove_user(self, index):
         if self.role_dict[self.users[index]] == "Werewolf":
             self.num_wolves -= 1
+            self.werewolves.remove(self.users[index])
         elif self.role_dict[self.users[index]] == "Hunter" and self.cycle == "day":
+            await self.ctx.send("My God he has got a crossbow, hunter who do you want to kill?")
             hunter_choice = await self.killer_turn()
             await self.ctx.send(f"Just before being put to death, the hunter killed {self.users[hunter_choice]}")
             await self.remove_user(hunter_choice) 
@@ -109,7 +119,7 @@ class werewolf():
             try:
                 m.content = m.content.split(',')
                 temp = [self.users[int(i)] for i in m.content]
-                return True and (m.guild == self.ctx.guild) and (len(temp)==2)
+                return True and (m.guild == self.ctx.guild) and (len(temp)==2) and temp[0] != temp[1]
             except: 
                 return False 
             
@@ -164,11 +174,14 @@ class werewolf():
             print(e)
             await self.ctx.send("Timed Out!")
 
-    async def killer_turn(self):
+    async def killer_turn(self, werewolf = True):
         def killer_check(m):
             return (m.content in list(map(lambda x: str(x), range(len(self.users)))))
-         
-        # cupid_id = self.client.get_user(int(self.cupid.id))
+
+        # if werewolf: 
+        #     werewolf_id = self.client.get_user(int(self.werewolves[0].id))
+
+            
         embed_users = await self.draw_users()
         await self.ctx.send(embed=embed_users)
         #send to all werewolves, but only get response from one
@@ -186,7 +199,8 @@ class werewolf():
 
     async def main(self):
         # for user in self.users:
-        #     await self.ctx.send(self.role_dict[user])
+        #     user_id = self.client.get_user(int(user.id))
+        #     await user_id.send(self.role_dict[user])
 
         await self.cupid_turn()
         while self.num_wolves > 0 and (2 * self.num_wolves != len(self.users)):
@@ -202,7 +216,7 @@ class werewolf():
         for i, user in enumerate(self.users):
             embed_users.add_field(name=i, value=user, inline=True)
         return embed_users
-        # self.game_board = await self.ctx.send(embed=embed_users)
+
         
 
 
@@ -217,7 +231,7 @@ class Werewolf(commands.Cog):
     @commands.command()    
     async def werewolf(self, ctx):
         ww = werewolf(ctx, self.client)#, users)
-        # print(ww.role_dict)
+        print(ww.role_dict)
         await ww.main()
 
 def setup(client):
