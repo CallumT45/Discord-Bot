@@ -3,3 +3,17 @@ files/credentials.txt
 test.py
 files/steps.txt
 Discord_bot.py
+cogs/__pycache__/blackjack.cpython-37.pyc
+cogs/__pycache__/cah.cpython-37.pyc
+cogs/__pycache__/codenames.cpython-37.pyc
+cogs/__pycache__/course.cpython-37.pyc
+cogs/__pycache__/example.cpython-37.pyc
+cogs/__pycache__/games.cpython-37.pyc
+cogs/__pycache__/jokes_and_memes.cpython-37.pyc
+cogs/__pycache__/misc.cpython-37.pyc
+cogs/__pycache__/test.cpython-37.pyc
+cogs/__pycache__/werewolf.cpython-37.pyc
+.gitignore
+graph.png
+testing.py
+testing2.py

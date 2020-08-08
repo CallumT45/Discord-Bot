@@ -284,16 +284,16 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    num = random.randint(0, 25)
+    num = random.randint(0, 100)
     channel = message.channel
     author = message.author
 
     #when I message the chat there is a 20% chance the bot will respond to me
-    if author.id == 307625115963621377 and num < 4:
+    if author.id == 307625115963621377 and num < 5:
         await channel.send(random.choice(messages))
 
     #When anyone messages the chat it will repsond 5% of the time, 80% with an insult
-    if num == 6:
+    if num == 6 and channel != 675378783057870868:
         fun_options = [get_insult, get_compliment]
 
         y = random.choices(fun_options, weights = [0.8, 0.2], k=1)
@@ -493,6 +493,22 @@ async def on_message(message):
 
     elif message.content.startswith("$insult"):
         await channel.send(get_insult())
+
+    elif message.content.startswith("$problem"):
+        with open('problems.json', 'r') as credfile:
+            problems = json.load(credfile)
+
+            # print(len(problems))
+            num = random.randint(0, 1021)
+
+            embed_problem = discord.Embed(title=problems[str(num)]['title'].upper(), color=0x00ff00)
+
+            embed_problem.add_field(name = 'Problem', value=problems[str(num)]['problem'], inline=False)
+            embed_problem.add_field(name = "Examples", value=problems[str(num)]['example'], inline=False)
+
+            await channel.send(embed=embed_problem)
+
+
 
 @client.event
 async def on_reaction_add(reaction, user):
