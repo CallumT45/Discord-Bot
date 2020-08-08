@@ -24,5 +24,5 @@ There is also a feature to react to a message with ❓, to create a google searc
 
 ## Sample Images
 
-<img src="/files/demo_images/discord.gif" alt="Demp Gif"
-	title="Demp" width="250"/>
+<img src="/files/demo_images/discord.gif" alt="Demo Gif"
+	title="Demo"/>
