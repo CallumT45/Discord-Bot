@@ -22,7 +22,7 @@ MScBot has a lot of features, split into 4 categories. Each commmand is called w
 
 There is also a feature to react to a message with ❓, to create a google search link to that message.
 
-## Sample Images
+## Demo Gif
 
 <img src="/files/demo_images/discord.gif" alt="Demo Gif"
 	title="Demo"/>
