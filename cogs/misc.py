@@ -11,6 +11,12 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def covid(self, ctx, country = 'Ireland', graph = "total_cases"):
+        """Return a sumary of recent covid cases in the supplied country
+
+        Args:
+            country (str, optional): [Wrap in quotes for multi word countries]. Defaults to 'Ireland'.
+            graph (str, optional): [total_deaths, total_cases, new_cases]. Defaults to "total_cases".
+        """
 
         df_all = pd.read_csv("https://covid.ourworldindata.org/data/ecdc/full_data.csv")
         country = country.lower()
