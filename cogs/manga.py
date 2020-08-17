@@ -45,18 +45,26 @@ class Manga(commands.Cog):
         page = 1
         URL2 = ""
         img_list = []
-        print("Collecting pages...")
+        part = ""
+        await ctx.send(("Collecting pages...This may take a minute")
         while True:
             URL = get_URL(manga, str(chapter), str(page))
             if URL == URL2:
                 break
             URL2 = URL
             img_list.append(get_img(URL))
+            if page == 30:
+                img_list[0].save(f"manga.pdf",
+                        save_all=True, append_images=img_list[1:])
+                await ctx.send(file=discord.File("manga.pdf",f"{manga.title()}-Chapter-{str(chapter)}-Part-1.pdf"))
+                img_list = []
+                part = "-Part-2"
             page += 1
 
-        img_list[0].save(f"manga.pdf",
-                        save_all=True, append_images=img_list[1:])
-        await ctx.send(file=discord.File("manga.pdf",f"{manga.title()}-Chapter-{str(chapter)}.pdf"))
+        if page != 30:
+            img_list[0].save(f"manga.pdf",
+                            save_all=True, append_images=img_list[1:])
+            await ctx.send(file=discord.File("manga.pdf",f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
 
 def setup(client):
     client.add_cog(Manga(client))
