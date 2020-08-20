@@ -1,6 +1,12 @@
 import discord
 from discord.ext import commands
-import praw, random, io, asyncio, urllib, json, requests
+import praw
+import random
+import io
+import asyncio
+import urllib
+import json
+import requests
 
 from urllib.request import Request, urlopen
 
@@ -15,7 +21,8 @@ reddit = praw.Reddit(client_id=credentials['ids']['reddit']['client_id'],
                      user_agent=credentials['ids']['reddit']['user_agent'])
 reddit.read_only = True
 
-class Jokes_and_Memems(commands.Cog):
+
+class Jokes_and_Memes(commands.Cog):
 
     def __init__(self, client):
         self.client = client
@@ -29,13 +36,15 @@ class Jokes_and_Memems(commands.Cog):
             if count == post_to_pick:
                 if not submission.stickied and not submission.is_video and submission.is_reddit_media_domain:
                     try:
-                        raw_post = str(submission.title) + " \u2191 " + str(submission.score) + "  r/" + str(subreddit)
+                        raw_post = str(submission.title) + " \u2191 " + \
+                            str(submission.score) + "  r/" + str(subreddit)
                         imgURL = submission.url
                         raw_data = urllib.request.urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.png"))
                         break
-                    except: continue
+                    except:
+                        continue
                 else:
                     post_to_pick += 1
 
@@ -48,18 +57,18 @@ class Jokes_and_Memems(commands.Cog):
             if count == post_to_pick:
                 if not submission.stickied and not submission.is_video and submission.is_reddit_media_domain:
                     try:
-                        raw_post = str(submission.title) + " \u2191 " + str(submission.score) + "  r/" + str(subreddit)
+                        raw_post = str(submission.title) + " \u2191 " + \
+                            str(submission.score) + "  r/" + str(subreddit)
                         imgURL = submission.url
                         raw_data = urllib.request.urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.gif"))
                         break
-                    except Exception as e: 
+                    except Exception as e:
                         print(e)
                         continue
                 else:
                     post_to_pick += 1
-
 
     @commands.command()
     async def eyebleach(self, ctx):
@@ -70,13 +79,15 @@ class Jokes_and_Memems(commands.Cog):
             if count == post_to_pick:
                 if not submission.stickied and not submission.is_video and submission.is_reddit_media_domain:
                     try:
-                        raw_post = str(submission.title) + " \u2191 " + str(submission.score) + "  r/" + str(subreddit)
+                        raw_post = str(submission.title) + " \u2191 " + \
+                            str(submission.score) + "  r/" + str(subreddit)
                         imgURL = submission.url
                         raw_data = urllib.request.urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "aww.gif"))
                         break
-                    except: continue
+                    except:
+                        continue
                 else:
                     post_to_pick += 1
 
@@ -88,17 +99,18 @@ class Jokes_and_Memems(commands.Cog):
         for count, submission in enumerate(reddit.subreddit(subreddit).top(random.choice(["week", "month"]))):
             if count == post_to_pick:
                 if not submission.stickied and not submission.is_video:
-                    raw_post = str(submission.title) + " \u2191 " + str(submission.score)
+                    raw_post = str(submission.title) + \
+                        " \u2191 " + str(submission.score)
                     await ctx.send(raw_post)
                     break
                 else:
                     post_to_pick += 1
 
-
     @commands.command()
     async def joke(self, ctx):
-        urls = ['https://official-joke-api.appspot.com/random_joke', 'https://official-joke-api.appspot.com/jokes/programming/random']
-        choice = random.choice([0,1])
+        urls = ['https://official-joke-api.appspot.com/random_joke',
+                'https://official-joke-api.appspot.com/jokes/programming/random']
+        choice = random.choice([0, 1])
         response = requests.get(urls[choice])
         json_data = json.loads(response.text)
 
@@ -108,58 +120,58 @@ class Jokes_and_Memems(commands.Cog):
         else:
             await ctx.send(json_data[0]['setup'])
             await ctx.send(json_data[0]['punchline'])
-    
+
     @commands.command()
-    async def distracted(self, ctx, text0, text1):        
+    async def distracted(self, ctx, text0, text1):
         """
             Generate a Distracted Boyfriend meme, Call command followed by text in quotes, then a space and the second text in quotes
         """
         URL = 'https://api.imgflip.com/caption_image'
         params = {
-            'username':credentials['ids']['reddit']['username'],
-            'password':credentials['ids']['reddit']['password'],
-            'template_id':'112126428',
-            'text0':text0,
-            'text1':text1
+            'username': credentials['ids']['reddit']['username'],
+            'password': credentials['ids']['reddit']['password'],
+            'template_id': '112126428',
+            'text0': text0,
+            'text1': text1
         }
-        response = requests.request('POST',URL,params=params).json()
+        response = requests.request('POST', URL, params=params).json()
         imgURL = response['data']['url']
         response = requests.get(imgURL)
         im = io.BytesIO(response.content)
         await ctx.send(file=discord.File(im, "meme.png"))
 
     @commands.command()
-    async def hotline(self, ctx, text0, text1):        
+    async def hotline(self, ctx, text0, text1):
         """
             Generate a Hotline bling meme, Call command followed by text in quotes, then a space and the second text in quotes
         """
         URL = 'https://api.imgflip.com/caption_image'
         params = {
-            'username':credentials['ids']['reddit']['username'],
-            'password':credentials['ids']['reddit']['password'],
-            'template_id':'181913649',
-            'text0':text0,
-            'text1':text1
+            'username': credentials['ids']['reddit']['username'],
+            'password': credentials['ids']['reddit']['password'],
+            'template_id': '181913649',
+            'text0': text0,
+            'text1': text1
         }
-        response = requests.request('POST',URL,params=params).json()
+        response = requests.request('POST', URL, params=params).json()
         imgURL = response['data']['url']
         response = requests.get(imgURL)
         im = io.BytesIO(response.content)
         await ctx.send(file=discord.File(im, "meme.png"))
 
     @commands.command()
-    async def cmm(self, ctx, text0):        
+    async def cmm(self, ctx, text0):
         """
             Generate a Change my Mind meme, Call command followed by text in quotes
         """
         URL = 'https://api.imgflip.com/caption_image'
         params = {
-            'username':credentials['ids']['reddit']['username'],
-            'password':credentials['ids']['reddit']['password'],
-            'template_id':'129242436',
-            'text0':text0
+            'username': credentials['ids']['reddit']['username'],
+            'password': credentials['ids']['reddit']['password'],
+            'template_id': '129242436',
+            'text0': text0
         }
-        response = requests.request('POST',URL,params=params).json()
+        response = requests.request('POST', URL, params=params).json()
         imgURL = response['data']['url']
         response = requests.get(imgURL)
         im = io.BytesIO(response.content)
@@ -167,4 +179,4 @@ class Jokes_and_Memems(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Jokes_and_Memems(client))
+    client.add_cog(Jokes_and_Memes(client))

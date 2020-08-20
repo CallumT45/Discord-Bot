@@ -1,6 +1,10 @@
 import discord
 from discord.ext import commands
-import requests, html, random, json, asyncio
+import requests
+import html
+import random
+import json
+import asyncio
 import io
 import urllib
 import json
@@ -9,6 +13,7 @@ from PIL import Image
 from urllib.request import Request, urlopen
 import bs4
 from fpdf import FPDF
+
 
 def get_URL(manga, chapter, page):
     URL = "http://www.mangareader.net"
@@ -19,6 +24,7 @@ def get_URL(manga, chapter, page):
     myimgs = [img for img in myimgs if img.has_attr(
         'alt') and "Page" in img['alt']]
     return 'https:' + myimgs[0]['src']
+
 
 def get_img(imgURL):
     req = Request(imgURL, headers={'User-Agent': 'Mozilla/5.0'})
@@ -31,6 +37,7 @@ def get_img(imgURL):
         return rgb
     except:
         return img
+
 
 class Manga(commands.Cog):
 
@@ -46,7 +53,7 @@ class Manga(commands.Cog):
         URL2 = ""
         img_list = []
         part = ""
-        await ctx.send(("Collecting pages...This may take a minute")
+        await ctx.send("Collecting pages...This may take a minute")
         while True:
             URL = get_URL(manga, str(chapter), str(page))
             if URL == URL2:
@@ -55,16 +62,17 @@ class Manga(commands.Cog):
             img_list.append(get_img(URL))
             if page == 30:
                 img_list[0].save(f"manga.pdf",
-                        save_all=True, append_images=img_list[1:])
-                await ctx.send(file=discord.File("manga.pdf",f"{manga.title()}-Chapter-{str(chapter)}-Part-1.pdf"))
+                                 save_all=True, append_images=img_list[1:])
+                await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}-Part-1.pdf"))
                 img_list = []
                 part = "-Part-2"
             page += 1
 
         if page != 30:
             img_list[0].save(f"manga.pdf",
-                            save_all=True, append_images=img_list[1:])
-            await ctx.send(file=discord.File("manga.pdf",f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
+                             save_all=True, append_images=img_list[1:])
+            await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
+
 
 def setup(client):
     client.add_cog(Manga(client))
