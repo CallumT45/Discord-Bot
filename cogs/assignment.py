@@ -20,9 +20,15 @@ class Assignment(commands.Cog):
                 return True
             except:
                 return False
+        print(ctx.channel.id)
+        try:
+            ID = ctx.guild.id
+        except:
+            ID = ctx.author.id
+
         if dateValidate(date):
             adb = AssignmentDatabase()
-            status = adb.new(date, assignment_details, ctx.guild.id)
+            status = adb.new(date, assignment_details, ID, ctx.channel.id)
             if status == "OK":
                 await ctx.send("Assignment Added")
             else:
@@ -41,8 +47,13 @@ class Assignment(commands.Cog):
                 return delta.days
             except:
                 return None
+
+        try:
+            ID = ctx.guild.id
+        except:
+            ID = ctx.author.id
         adb = AssignmentDatabase()
-        rows = adb.due(ctx.guild.id)
+        rows = adb.due(ID)
         text = ''
         for row in rows:
             numDays = countdown(row[0])
@@ -54,10 +65,18 @@ class Assignment(commands.Cog):
     @commands.command()
     async def remove(self, ctx, assignment_details):
         """Removes a row in the assignment list, matches assignment details"""
+        try:
+            ID = ctx.guild.id
+        except:
+            ID = ctx.author.id
 
         adb = AssignmentDatabase()
-        adb.remove(assignment_details, ctx.guild.id)
+        adb.remove(assignment_details, ID)
         await ctx.send("Assignment Removed")
+
+    @commands.command()
+    async def test(self, ctx):
+        await ctx.send(ctx.author.id)
 
 
 def setup(client):

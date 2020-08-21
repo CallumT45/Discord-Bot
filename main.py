@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import requests
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
+from cogs.extraClasses.AssignmentDB import AssignmentDatabase
 
 client = commands.Bot(command_prefix='$')
 
@@ -19,50 +20,24 @@ with open('files/credentials.txt', 'r') as credfile:
     credentials = json.load(credfile)
 
 
-def countdown(duedate):
-    """Given a date, calculates the number of days from today until then"""
-    try:
-        date_format = "%d/%m/%Y"
-        duedateFormat2 = datetime.datetime.strptime(duedate, date_format)
-        today = datetime.datetime.strptime(
-            str(datetime.date.today()), '%Y-%m-%d')
-        delta = duedateFormat2 - today
-        return delta.days
-    except:
-        return None
-
-
 async def deadline():
     """Function which runs every 24 hours, calls the countdown function, if the assignment is due in one day then
     alert is sent into general channel. Opens the assingment file, stores all the lines, clears the file, alerts the discord if assignment is due
     in 1 day, rewrites assignments which are not past due"""
     await client.wait_until_ready()
-    # change this to whatever id you need
-    channel = client.get_channel(
-        credentials['ids']['discord']['main_channel_id'])
     while not client.is_closed():
-        lines = []
         try:
-            with open('files/AssignmentList.csv', 'r') as readFile:
-                csv_reader = csv.reader(readFile, delimiter=',')
+            adb = AssignmentDatabase()
+            due = adb.check_due()
+            for row in due:
+                text2 = f'{row[1]} | due on {row[0].strftime("%A")}, {row[0].strftime("%d/%m/%Y")}\n\n'
+                embedDue = discord.Embed(
+                    title="Alert Assignment Due Tomorrow", description=text2, color=0x00ff00)
 
-                for row in csv_reader:
-                    lines.append(row)
-                    numDays = countdown(row[1])
-                    if numDays == 1:
-                        text2 = f'{row[2]} | due on {row[0]}, {row[1]}'
-                        embedDue = discord.Embed(
-                            title="Alert Assignment Due Tomorrow", description=text2, color=0x00ff00)
-                        await channel.send(embed=embedDue)
-
-                    if numDays < 0:
-                        lines.remove(row)
-
-            lines.sort(key=lambda x: datetime.datetime.strptime(
-                x[1], "%d/%m/%Y"))  # sorts the assignments by due date
-            with open('files/AssignmentList.csv', 'w', newline='\n') as writeFile:
-                writer = csv.writer(writeFile)
-                writer.writerows(lines)
+                send_address = client.get_user(row[2])
+                if not send_address:
+                    send_address = client.get_channel(row[3])
+                await send_address.send(embed=embedDue)
 
             # everyday check to see if any assignments are due in 1 day
             await asyncio.sleep(86400)

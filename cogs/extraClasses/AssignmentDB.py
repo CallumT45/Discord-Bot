@@ -18,7 +18,7 @@ class AssignmentDatabase():
         ResultProxy = self.connection.execute(query)
         return ResultProxy.fetchall()
 
-    def new(self, due_date, assignment_details, guild_id):
+    def new(self, due_date, assignment_details, guild_id, channel_id):
         if not self.if_exists(assignment_details, guild_id):
             table = db.Table('assignments', self.metadata,
                              autoload=True, autoload_with=self.engine)
@@ -26,7 +26,8 @@ class AssignmentDatabase():
             ins = table.insert().values(
                 due_date=datetime.strptime(due_date, '%d/%m/%Y'),
                 assignment_details=assignment_details,
-                guild_id=guild_id)
+                guild_id=guild_id,
+                channel_id=channel_id)
             self.connection.execute(ins)
             return "OK"
         else:
@@ -58,12 +59,13 @@ class AssignmentDatabase():
                             Column('due_date', Date),
                             Column('assignment_details', String(
                                 100), primary_key=True),
-                            Column('guild_id', Integer, primary_key=True)
+                            Column('guild_id', Integer, primary_key=True),
+                            Column('channel_id', Integer),
                             )
         assignments.create(self.engine)
 
-    def check_due(self, guild_id):
-        """[Returns any assignments due in the next day for the givens server]
+    def check_due(self):
+        """[Returns any assignments due in the next day for the given server]
 
         Args:
             guild_id ([int]): [Server ID]
@@ -77,7 +79,7 @@ class AssignmentDatabase():
         assignments = db.Table('assignments', self.metadata,
                                autoload=True, autoload_with=self.engine)
         query = db.select([assignments]).where(and_(assignments.columns.due_date >= tomorrow,
-                                                    assignments.columns.due_date < day_after, assignments.columns.guild_id == guild_id))
+                                                    assignments.columns.due_date < day_after))
         ResultProxy = self.connection.execute(query)
         return ResultProxy.fetchall()
 
@@ -104,11 +106,11 @@ class AssignmentDatabase():
 
 if __name__ == "__main__":
     adb = AssignmentDatabase()
-    # adb.create_db()
+    adb.create_db()
     # adb.new("23/08/2020", "Test4", 693142919921664080)
     # adb.new("23/08/2020", "Test32", 6)
     # adb.new("1/08/2020", "Test4", 6)
     # adb.check_due(6)
     # adb.remove("Test4", 6)
     # adb.past_due(6)
-    print(adb.due(693142919921664080))
+    # print(adb.due(693142919921664080))
