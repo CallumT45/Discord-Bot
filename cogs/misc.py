@@ -10,6 +10,8 @@ import urllib
 import matplotlib.pyplot as plt
 from Equation import Expression
 import pandas as pd
+import sqlalchemy as db
+from sqlalchemy import Column, Integer, String, Date, MetaData, Table, and_, func, not_
 
 
 class Misc(commands.Cog):
@@ -153,6 +155,17 @@ class Misc(commands.Cog):
             embed_problem.add_field(
                 name="Link", value="https://leetcode.com/problems/" + problems[str(num)]['title'], inline=False)
             await ctx.send(embed=embed_problem)
+
+    @commands.command()
+    async def wyr(self, ctx):
+        engine = db.create_engine('sqlite:///wyr.sqlite')
+        connection = engine.connect()
+        metadata = db.MetaData()
+
+        wyr = db.Table('wyr', metadata, autoload=True, autoload_with=engine)
+        query = db.select([wyr]).order_by(func.RANDOM()).limit(1)
+        ResultProxy = connection.execute(query)
+        await ctx.send(ResultProxy.fetchall()[0][0])
 
 
 def setup(client):

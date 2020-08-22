@@ -1,8 +1,6 @@
 .vscode/settings.json
 files/credentials.txt
 test.py
-files/steps.txt
-Discord_bot.py
 cogs/__pycache__/blackjack.cpython-37.pyc
 cogs/__pycache__/cah.cpython-37.pyc
 cogs/__pycache__/codenames.cpython-37.pyc
@@ -17,3 +15,4 @@ cogs/__pycache__/werewolf.cpython-37.pyc
 graph.png
 testing.py
 testing2.py
+assignments.sqlite
