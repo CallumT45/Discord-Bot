@@ -60,7 +60,10 @@ class Assignment(commands.Cog):
             text += f'{row[1]} | due on {row[0].strftime("%A")}, {row[0].strftime("%d/%m/%Y")} | {numDays} day/s\n\n'
         embedAss = discord.Embed(
             title="Upcoming Assignments", description=text, color=0x00ff00)
-        await ctx.send(embed=embedAss)
+        if rows:
+            await ctx.send(embed=embedAss)
+        else:
+            await ctx.send("No upcoming assignments")
 
     @commands.command()
     async def remove(self, ctx, assignment_details):
@@ -73,10 +76,6 @@ class Assignment(commands.Cog):
         adb = AssignmentDatabase()
         adb.remove(assignment_details, ID)
         await ctx.send("Assignment Removed")
-
-    @commands.command()
-    async def test(self, ctx):
-        await ctx.send(ctx.author.id)
 
 
 def setup(client):

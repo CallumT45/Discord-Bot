@@ -1,18 +1,13 @@
 import discord
 from discord.ext import commands
-import requests
 import html
 import random
-import json
 import asyncio
 import io
-import urllib
-import json
 import requests
 from PIL import Image
 from urllib.request import Request, urlopen
 import bs4
-from fpdf import FPDF
 
 
 def get_URL(manga, chapter, page):
@@ -47,31 +42,35 @@ class Manga(commands.Cog):
     @commands.command()
     async def manga(self, ctx, manga, chapter):
         """
-           Returns the given chapter from the given manga
+           Call this command with the name of the manga in quotes followed by the chapter number
         """
-        page = 1
-        URL2 = ""
-        img_list = []
-        part = ""
-        await ctx.send("Collecting pages...This may take a minute")
-        while True:
-            URL = get_URL(manga, str(chapter), str(page))
-            if URL == URL2:
-                break
-            URL2 = URL
-            img_list.append(get_img(URL))
-            if page == 30:
+        try:
+            page = 1
+            URL2 = ""
+            img_list = []
+            part = ""
+            await ctx.send("Collecting pages...This may take a minute")
+            while True:
+                URL = get_URL(manga.lower().replace(
+                    " ", "-"), str(chapter), str(page))
+                if URL == URL2:
+                    break
+                URL2 = URL
+                img_list.append(get_img(URL))
+                if page == 30:
+                    img_list[0].save(f"manga.pdf",
+                                     save_all=True, append_images=img_list[1:])
+                    await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}-Part-1.pdf"))
+                    img_list = []
+                    part = "-Part-2"
+                page += 1
+
+            if page != 30:
                 img_list[0].save(f"manga.pdf",
                                  save_all=True, append_images=img_list[1:])
-                await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}-Part-1.pdf"))
-                img_list = []
-                part = "-Part-2"
-            page += 1
-
-        if page != 30:
-            img_list[0].save(f"manga.pdf",
-                             save_all=True, append_images=img_list[1:])
-            await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
+                await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
+        except:
+            await ctx.send("Error: Please ensure the manga name and chapter number are correct")
 
 
 def setup(client):

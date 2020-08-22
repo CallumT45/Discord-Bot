@@ -4,8 +4,7 @@ import random, asyncio
 
 
 def remove_newline(text):
-
-    	return text.replace('\n', ' ')
+    return text.replace('\n', ' ')
 
 class Player():
     def __init__(self, casts):
