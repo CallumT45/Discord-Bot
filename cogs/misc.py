@@ -10,8 +10,9 @@ import urllib
 import matplotlib.pyplot as plt
 from Equation import Expression
 import pandas as pd
+
 import sqlalchemy as db
-from sqlalchemy import Column, Integer, String, Date, MetaData, Table, and_, func, not_
+from sqlalchemy import MetaData, Table, and_, func, not_, inspect
 
 
 class Misc(commands.Cog):
@@ -157,8 +158,12 @@ class Misc(commands.Cog):
             await ctx.send(embed=embed_problem)
 
     @commands.command()
+    async def choice(self, ctx, *args):
+        await ctx.send("Trouble choosing? Well I pick: " + random.choice(args))
+
+    @commands.command()
     async def wyr(self, ctx):
-        engine = db.create_engine('sqlite:///wyr.sqlite')
+        engine = db.create_engine('sqlite:///database/wyr.sqlite')
         connection = engine.connect()
         metadata = db.MetaData()
 

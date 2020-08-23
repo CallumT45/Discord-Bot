@@ -21,9 +21,7 @@ with open('files/credentials.txt', 'r') as credfile:
 
 
 async def deadline():
-    """Function which runs every 24 hours, calls the countdown function, if the assignment is due in one day then
-    alert is sent into general channel. Opens the assingment file, stores all the lines, clears the file, alerts the discord if assignment is due
-    in 1 day, rewrites assignments which are not past due"""
+    """Function which runs every 24 hours, checks the db for any assignments due in the enxt 24 hours, if so then sends them to the respecitive channel"""
     await client.wait_until_ready()
     while not client.is_closed():
         try:

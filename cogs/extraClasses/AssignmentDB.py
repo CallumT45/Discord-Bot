@@ -6,7 +6,7 @@ from datetime import datetime, date, timedelta
 class AssignmentDatabase():
 
     def __init__(self):
-        self.engine = db.create_engine('sqlite:///assignments.sqlite')
+        self.engine = db.create_engine('sqlite:///database/assignments.sqlite')
         self.connection = self.engine.connect()
         self.metadata = db.MetaData()
 
