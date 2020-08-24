@@ -3,13 +3,10 @@ import csv
 import datetime
 import io
 import json
-import os
 import random
-import re
+import os
 
 import discord
-import matplotlib.pyplot as plt
-import requests
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 from cogs.extraClasses.AssignmentDB import AssignmentDatabase

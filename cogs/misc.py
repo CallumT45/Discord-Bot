@@ -159,10 +159,16 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def choice(self, ctx, *args):
+        """
+        Let the bot choose between options, call the command followed by all the options separated by a space.
+        """
         await ctx.send("Trouble choosing? Well I pick: " + random.choice(args))
 
     @commands.command()
     async def wyr(self, ctx):
+        """
+        Return a would you rather question
+        """
         engine = db.create_engine('sqlite:///database/wyr.sqlite')
         connection = engine.connect()
         metadata = db.MetaData()

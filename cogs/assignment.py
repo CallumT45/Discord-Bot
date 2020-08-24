@@ -13,6 +13,9 @@ class Assignment(commands.Cog):
 
     @commands.command()
     async def new(self, ctx, date, assignment_details):
+        """
+        Add a new assignment by calling the command followed by the due date in dd/mm/yyyy then the assignment in quotes
+        """
         def dateValidate(date_text):
             """Function ensures that unless input is in the right format, it will not be read in as a date"""
             try:
@@ -20,7 +23,6 @@ class Assignment(commands.Cog):
                 return True
             except:
                 return False
-        print(ctx.channel.id)
         try:
             ID = ctx.guild.id
         except:
@@ -38,7 +40,7 @@ class Assignment(commands.Cog):
 
     @commands.command()
     async def due(self, ctx):
-        """Prints the contents of the assignments csv in a discord embedded message"""
+        """Show all the upcoming assignments"""
         def countdown(duedate):
             """Given a date, calculates the number of days from today until then"""
             try:
@@ -67,7 +69,7 @@ class Assignment(commands.Cog):
 
     @commands.command()
     async def remove(self, ctx, assignment_details):
-        """Removes a row in the assignment list, matches assignment details"""
+        """Removes a assignment from db, call command followed by the exact assignment details in quotes"""
         try:
             ID = ctx.guild.id
         except:

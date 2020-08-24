@@ -1,13 +1,8 @@
 import discord
-from discord.ext import commands
 import random
 import asyncio
 import sqlalchemy as db
-from sqlalchemy import MetaData, Table, and_, func, not_, inspect
-
-
-def remove_newline(text):
-    return text.replace('\n', ' ')
+from sqlalchemy import MetaData, Table, and_, func
 
 
 class Player():
@@ -35,7 +30,7 @@ class Player():
 
     def play_card(self, num):
         """
-        Removes the given card and returns it from printing 
+        Removes the given card and returns it
         """
         return self.cards.pop(num)
 
@@ -259,38 +254,3 @@ class CAH():
         while not self.player_wins():
             await self.round()
         await self.ctx.send(f"Game Over! Winner was {self.users[self.winner].name}")
-
-
-class CardsAgainstHumanity(commands.Cog):
-
-    def __init__(self, client):
-        self.client = client
-
-    @commands.command()
-    async def cah(self, ctx, rounds):
-
-        embed_rules = discord.Embed(
-            title="Cards Against Humanity", color=0x00ff00)
-
-        embed_rules.add_field(name='Description', value="Cards Against Humanity is a party game for horrible people. Unlike most of the party games you've played before, Cards Against Humanity is as despicable and awkward as you and your friends.", inline=False)
-        embed_rules.add_field(name='How to Play?', value="The game is simple. Each round, one player asks a question from a black card, and everyone else answers with their funniest white card. To choose a card, click the appropriate emoji. Each round, each player will chose their cards by round robin", inline=False)
-        embed_rules.add_field(
-            name='How to Join', value='To play react to this message', inline=False)
-
-        msg = await ctx.send(embed=embed_rules)
-        await msg.add_reaction(emoji='\U00002705')
-        await asyncio.sleep(10)
-
-        cache_msg = discord.utils.get(self.client.cached_messages, id=msg.id)
-        reaction = cache_msg.reactions[0]
-        users = await reaction.users().flatten()
-        users = [x for x in users if str(x) != str(self.client.user)]
-        # if 2 < len(users) < 9:
-        game = CAH(ctx, self.client, rounds, users)
-        await game.main()
-        # else:
-        #     await ctx.send("Game requires 3 to 8 players!")
-
-
-def setup(client):
-    client.add_cog(CardsAgainstHumanity(client))
