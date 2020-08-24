@@ -24,12 +24,13 @@ class Games(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
+        """?"""
         await ctx.send("Pong!")
 
     @commands.command()
     async def hangman(self, ctx):
         """
-        Classic game of hangman
+        Classic game of Hangman
         """
         hm = Hangman(ctx, self.client, self.congrats)
         await hm.maingame()
@@ -127,7 +128,7 @@ class Games(commands.Cog):
 
     @commands.command()
     async def werewolf(self, ctx):
-
+        """Can you find the werewolves before they find you?"""
         embed_rules = discord.Embed(title="Werewolf", color=0x00ff00)
 
         embed_rules.add_field(
@@ -152,6 +153,7 @@ class Games(commands.Cog):
 
     @commands.command()
     async def blackjack(self, ctx):
+        """Can you beat the Dealer?"""
         objective = """
             Beat The Dealer. There are some misconceptions about the objective of the game of blackjack but at the simplest level all you are trying to do is beat the dealer.
         """
@@ -199,6 +201,7 @@ class Games(commands.Cog):
 
     @commands.command()
     async def codenames(self, ctx):
+        """Get the secret code to your operatives in the field"""
         objective = """
             The aim of the game is to find all of your teams words in the word grid. First team to Zero wins.
         """
@@ -241,8 +244,12 @@ class Games(commands.Cog):
             await ctx.send("You need at least 4 to play!")
 
     @commands.command()
-    async def cah(self, ctx, rounds):
+    async def cah(self, ctx, rounds=5):
+        """A card game for horrible people
 
+        Args:
+            rounds (int, optional): [Set how many round to play]. Defaults to 5.
+        """
         embed_rules = discord.Embed(
             title="Cards Against Humanity", color=0x00ff00)
 

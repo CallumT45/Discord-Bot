@@ -11,7 +11,7 @@ from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 from cogs.extraClasses.AssignmentDB import AssignmentDatabase
 
-client = commands.Bot(command_prefix='$')
+client = commands.Bot(command_prefix='!', case_insensitive=True)
 
 with open('files/credentials.txt', 'r') as credfile:
     credentials = json.load(credfile)

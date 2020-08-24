@@ -6,16 +6,17 @@ import datetime
 import io
 import random
 import json
-import urllib
 import matplotlib.pyplot as plt
 from Equation import Expression
 import pandas as pd
-
+from cogs.extraClasses.manga import MangaDL
 import sqlalchemy as db
 from sqlalchemy import MetaData, Table, and_, func, not_, inspect
+from PIL import Image
+from urllib.request import Request, urlopen
 
 
-class Misc(commands.Cog):
+class Miscellaneous(commands.Cog):
 
     def __init__(self, client):
         self.client = client
@@ -26,7 +27,7 @@ class Misc(commands.Cog):
 
         Args:
             country (str, optional): [Wrap in quotes for multi word countries]. Defaults to 'Ireland'.
-            graph (str, optional): [total_deaths, total_cases, new_cases]. Defaults to "total_cases".
+            graph (str, optional): [total_deaths, new_deaths, total_cases, new_cases]. Defaults to "total_cases".
         """
 
         df_all = pd.read_csv(
@@ -76,7 +77,7 @@ class Misc(commands.Cog):
     @commands.command()
     async def insult(self, ctx):
         """
-        Chooses from two endpoints and returns the insult
+        Let the bot knock you down a peg
         """
         urls = ["https://insult.mattbas.org/api/insult.txt",
                 "https://amused.api.stdlib.com/insult@1.0.0/"]
@@ -99,7 +100,7 @@ class Misc(commands.Cog):
         """
         try:
             xn = Expression(*args)
-            await ctx.send(*args)  # + '=' + str(xn()))
+            await ctx.send(*args)
             await ctx.send('= ' + str(xn()))
         except Exception as e:
             # print(e)
@@ -107,8 +108,9 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def xkcd(self, ctx, num=random.randint(1, 2250)):
-        """
-            Call this command for a random comic or call the command followed by the comic number for a specific comic
+        """Get random comic or call the command followed by the comic number for a specific comic
+        Args:
+            num ([type], optional): [Comic number ]. Defaults to random.
         """
         response = requests.get(f"https://xkcd.com/{num}/")
         soup = bs4.BeautifulSoup(response.text, 'html.parser')
@@ -116,7 +118,7 @@ class Misc(commands.Cog):
         data = data[0].findAll("img")[0]
         url = str(data).split('src')[1].split('title')[0]
         imgURL = "HTTPS:"+url[2:-2]
-        raw_data = urllib.request.urlopen(imgURL).read()
+        raw_data = urlopen(imgURL).read()
         im = io.BytesIO(raw_data)
         await ctx.send(file=discord.File(im, "xkcd_comic.png"))
 
@@ -178,6 +180,45 @@ class Misc(commands.Cog):
         ResultProxy = connection.execute(query)
         await ctx.send(ResultProxy.fetchall()[0][0])
 
+    @commands.command()
+    async def manga(self, ctx, manga, chapter=1):
+        """Download a PDF of your favourite Manga
+
+        Args:
+            ctx ([type]): [The name of the manga enclosed in quotes]
+            manga ([type]): [The name of the manga enclosed in quotes]
+            chapter (int, optional): [The chapter number of the manga]. Defaults to 1.
+        """
+        MD = MangaDL()
+        try:
+            page = 1
+            URL2 = ""
+            img_list = []
+            part = ""
+            await ctx.send("Collecting pages...This may take a minute")
+            while True:
+                URL = MD.get_URL(manga.lower().replace(
+                    " ", "-"), str(chapter), str(page))
+                if URL == URL2:
+                    break
+                URL2 = URL
+                img_list.append(MD.get_img(URL))
+                if page == 30:
+                    img_list[0].save(f"manga.pdf",
+                                     save_all=True, append_images=img_list[1:])
+                    await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}-Part-1.pdf"))
+                    img_list = []
+                    part = "-Part-2"
+                page += 1
+
+            if page != 30:
+                img_list[0].save(f"manga.pdf",
+                                 save_all=True, append_images=img_list[1:])
+                await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
+        except Exception as e:
+            print(e)
+            await ctx.send("Error: Please ensure the manga name and chapter number are correct")
+
 
 def setup(client):
-    client.add_cog(Misc(client))
+    client.add_cog(Miscellaneous(client))

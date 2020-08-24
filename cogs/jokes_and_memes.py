@@ -3,8 +3,6 @@ from discord.ext import commands
 import praw
 import random
 import io
-import asyncio
-import urllib
 import json
 import requests
 
@@ -39,7 +37,7 @@ class Jokes_and_Memes(commands.Cog):
                         raw_post = str(submission.title) + " \u2191 " + \
                             str(submission.score) + "  r/" + str(subreddit)
                         imgURL = submission.url
-                        raw_data = urllib.request.urlopen(imgURL).read()
+                        raw_data = urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.png"))
                         break
@@ -60,7 +58,7 @@ class Jokes_and_Memes(commands.Cog):
                         raw_post = str(submission.title) + " \u2191 " + \
                             str(submission.score) + "  r/" + str(subreddit)
                         imgURL = submission.url
-                        raw_data = urllib.request.urlopen(imgURL).read()
+                        raw_data = urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.gif"))
                         break
@@ -82,7 +80,7 @@ class Jokes_and_Memes(commands.Cog):
                         raw_post = str(submission.title) + " \u2191 " + \
                             str(submission.score) + "  r/" + str(subreddit)
                         imgURL = submission.url
-                        raw_data = urllib.request.urlopen(imgURL).read()
+                        raw_data = urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "aww.gif"))
                         break
@@ -108,6 +106,10 @@ class Jokes_and_Memes(commands.Cog):
 
     @commands.command()
     async def joke(self, ctx):
+        """
+        Probably a funny joke
+        """
+
         urls = ['https://official-joke-api.appspot.com/random_joke',
                 'https://official-joke-api.appspot.com/jokes/programming/random']
         choice = random.choice([0, 1])
@@ -123,8 +125,11 @@ class Jokes_and_Memes(commands.Cog):
 
     @commands.command()
     async def distracted(self, ctx, text0, text1):
-        """
-            Generate a Distracted Boyfriend meme, Call command followed by text in quotes, then a space and the second text in quotes
+        """Generate a Distracted Boyfriend meme
+
+        Args:
+            text0 ([String]): [Text on woman, enclose in quotes]
+            text1 ([String]): [Text on boyfriend, enclose in quotes]
         """
         URL = 'https://api.imgflip.com/caption_image'
         params = {
@@ -142,8 +147,11 @@ class Jokes_and_Memes(commands.Cog):
 
     @commands.command()
     async def hotline(self, ctx, text0, text1):
-        """
-            Generate a Hotline bling meme, Call command followed by text in quotes, then a space and the second text in quotes
+        """Generate a Hotline bling meme, Call command followed by text in quotes, then a space and the second text in quotes
+
+        Args:
+            text0 ([String]): [Top text, enclose in quotes]
+            text1 ([String]): [Bottom text, enclose in quotes]
         """
         URL = 'https://api.imgflip.com/caption_image'
         params = {
@@ -161,8 +169,10 @@ class Jokes_and_Memes(commands.Cog):
 
     @commands.command()
     async def cmm(self, ctx, text0):
-        """
-            Generate a Change my Mind meme, Call command followed by text in quotes
+        """Generate a Change my Mind meme
+
+        Args:
+            text0 ([String]): [Text on sign, enclose in quotes]
         """
         URL = 'https://api.imgflip.com/caption_image'
         params = {
