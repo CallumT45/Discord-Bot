@@ -20,7 +20,7 @@ class Games(commands.Cog):
         self.client = client
         self.congrats = congrats = ["Wow, turns our youre like smart or something", "Powerful, impressive, firm and unforgettable. But enough about your farting... Congrats!", "Congratulations on finding your balls",
                                     "Wow, Well done, your Mother and I are very proud", "You have performed extremely adequately.", "You surprised me a little bit. I knew you were capable, but I didn't expect this level of accomplishment!",
-                                    "I genuinely thought you'd fail again", "Ooooh look at you all clever and shit!"]
+                                    "I genuinely thought you'd fail again", "Ooooh look at you all clever and shit!", "Feeling so much joy for you today. What an impressive achievement!", "I’ve got a feeling this is only the beginning of even more great things to come for you!", "It looks like you'll be world's No.1 in a few hours and I wanted to be the first to congratulate you!", "Congratulations! Now Back To Work!"]
 
     @commands.command()
     async def ping(self, ctx):
@@ -119,11 +119,10 @@ class Games(commands.Cog):
                 if not PvP:
                     await tttGame.mainGame()
             except Exception as e:
-                await ctx.send(e)
-                await ctx.send('Timed Out!')
+                print(e)
+                await ctx.send('Game Over!')
 
-        except Exception as e:
-            print(e)
+        except:
             await ctx.send("Timed out!")
 
     @commands.command()

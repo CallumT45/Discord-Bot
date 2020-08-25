@@ -51,7 +51,7 @@ class Hangman():
 
     async def maingame(self):
         def letter_check(m):
-            return (m.content in self.letters_left or m.content.lower() == "stop") and m.guild == self.ctx.guild
+            return (m.content.lower() in self.letters_left or m.content.lower() == "stop") and m.guild == self.ctx.guild
         await self.ctx.send(f"Word has {len(self.cg)} letters")
         while self.cg != self.split_wtg:  # While guessed word is not equal to the hidden word
             try:
@@ -65,8 +65,8 @@ class Hangman():
                     await self.ctx.send("Timed Out!")
                     break
 
-                self.letters_left.remove(guess.content)
-                self.game(guess.content)
+                self.letters_left.remove(guess.content.lower())
+                self.game(guess.content.lower())
                 letters_string = self.string_format(self.letters_left)
                 embed = discord.Embed(title="Hangman", color=0x00ff00)
                 embed.add_field(name="Letters Left",

@@ -23,16 +23,16 @@ class TicTacToe():
 
     async def drawBoard(self):
         """Prints the board in the correct format"""
+        def string_format(L, M, R):
+            text = f"{L}{M}{R}"
+            return text
         tic_embed = discord.Embed(title='TicTacToe', color=0x00ff00)
-        tic_embed.add_field(name=".", value=self.board[7], inline=True)
-        tic_embed.add_field(name=".", value=self.board[8], inline=True)
-        tic_embed.add_field(name=".", value=self.board[9], inline=True)
-        tic_embed.add_field(name=".", value=self.board[4], inline=True)
-        tic_embed.add_field(name=".", value=self.board[5], inline=True)
-        tic_embed.add_field(name=".", value=self.board[6], inline=True)
-        tic_embed.add_field(name=".", value=self.board[1], inline=True)
-        tic_embed.add_field(name=".", value=self.board[2], inline=True)
-        tic_embed.add_field(name=".", value=self.board[3], inline=True)
+        tic_embed.add_field(name=".", value=string_format(
+            self.board[7],  self.board[8],  self.board[9]), inline=False)
+        tic_embed.add_field(name=".", value=string_format(
+            self.board[4],  self.board[5],  self.board[6]), inline=False)
+        tic_embed.add_field(name=".", value=string_format(
+            self.board[1],  self.board[2],  self.board[3]), inline=False)
 
         if self.rounds < 1:
             self.game_board = await self.ctx.send(embed=tic_embed)

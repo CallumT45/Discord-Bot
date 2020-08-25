@@ -234,9 +234,9 @@ class BlackJack():
                             self.deck.move_cards(player, 1)
                             # reload the embed with player hands
                             for j, player2 in enumerate(self.players):
-                                if not player.out:
+                                if not player2.out:
                                     embed_players.add_field(
-                                        name=f"{self.users[i].name}", value=player2, inline=True)
+                                        name=f"{self.users[J].name}", value=player2, inline=True)
                                     await self.players_msg.edit(embed=embed_players)
 
                         if player.get_value() > 21:

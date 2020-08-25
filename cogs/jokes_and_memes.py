@@ -40,9 +40,11 @@ class Jokes_and_Memes(commands.Cog):
                         raw_data = urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.png"))
-                        break
+
                     except:
+                        post_to_pick += 1
                         continue
+                    break
                 else:
                     post_to_pick += 1
 
@@ -61,10 +63,12 @@ class Jokes_and_Memes(commands.Cog):
                         raw_data = urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.gif"))
-                        break
+
                     except Exception as e:
                         print(e)
+                        post_to_pick += 1
                         continue
+                    break
                 else:
                     post_to_pick += 1
 
@@ -83,9 +87,11 @@ class Jokes_and_Memes(commands.Cog):
                         raw_data = urlopen(imgURL).read()
                         im = io.BytesIO(raw_data)
                         await ctx.send(raw_post, file=discord.File(im, "aww.gif"))
-                        break
+
                     except:
+                        post_to_pick += 1
                         continue
+                    break
                 else:
                     post_to_pick += 1
 
