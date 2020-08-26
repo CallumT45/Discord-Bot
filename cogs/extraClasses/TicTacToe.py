@@ -81,6 +81,7 @@ class TicTacToe():
             test_board[self.turns[i]] = self.letter_dict[self.comp_letter]
             if self.victory(test_board):
                 # if victory update the board and remove from turns list
+                await self.game_board.clear_reaction(emoji=self.board[self.turns[i]])
                 self.board[self.turns[i]] = self.letter_dict[self.comp_letter]
                 self.turns.remove(self.turns[i])
                 # await self.drawBoard()
@@ -91,6 +92,7 @@ class TicTacToe():
             test_board[self.turns[i]] = self.letter_dict[self.player_letter]
             if self.victory(test_board):
                 # if victory update the board and remove from turns list
+                await self.game_board.clear_reaction(emoji=self.board[self.turns[i]])
                 self.board[self.turns[i]] = self.letter_dict[self.comp_letter]
                 self.turns.remove(self.turns[i])
                 # await self.drawBoard()
@@ -98,6 +100,7 @@ class TicTacToe():
 
         # turns keeps track of options we have left, this line randomly chooses
         comp = random.choice(self.turns)
+        await self.game_board.clear_reaction(emoji=self.board[comp])
         self.board[comp] = self.letter_dict[self.comp_letter]
         self.turns.remove(comp)
         # await self.drawBoard()
@@ -113,11 +116,9 @@ class TicTacToe():
         flag = True
         while flag:  # while no victory is determined or while there are turns left to make
             self.rounds += 1
-            # await self.ctx.send("Choose your spot\n")
-
             try:
-                # move = await self.client.wait_for('message', timeout=45.0, check=move_check)
-                reaction, user = await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.game_board))
+                reaction, user = await self.client.wait_for('reaction_add', timeout=45.0, check=react_check(self.game_board))
+                await self.game_board.clear_reaction(emoji=str(reaction.emoji))
                 move = self.board.index(str(reaction.emoji))
             except:
                 await self.ctx.send('Timed Out!')
@@ -148,6 +149,7 @@ class TicTacToe():
         try:
             reaction, user = await self.client.wait_for('reaction_add', timeout=30.0, check=react_check(self.game_board))
             move = self.board.index(str(reaction.emoji))
+            await self.game_board.clear_reaction(emoji=str(reaction.emoji))
             return move
         except Exception as e:
             print(e)

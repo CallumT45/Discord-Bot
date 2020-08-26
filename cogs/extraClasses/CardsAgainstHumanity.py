@@ -5,6 +5,14 @@ import sqlalchemy as db
 from sqlalchemy import MetaData, Table, and_, func
 
 
+# class PlayerP():
+#     def __init__(self, name, idn):
+#         self.name = name
+#         self.id = idn
+
+# [PlayerP("Callum", 307625115963621377), PlayerP(
+#             "Ben", 307625115963621377), PlayerP("Eoin", 307625115963621377)]
+
 class Player():
     def __init__(self):
         self.score = 0
@@ -177,7 +185,7 @@ class CAH():
 
         def react_check(msg):
             def check(reaction, reacting_user):
-                return reacting_user == self.czar and str(reaction.emoji) in self.emojis and reaction.message.id == msg.id
+                return reacting_user.id == self.czar.id and str(reaction.emoji) in self.emojis and reaction.message.id == msg.id
             return check
         # pick Card Czar works in round robin fashion
         czar_index = self.round_count % len(self.users)
@@ -233,7 +241,7 @@ class CAH():
             reaction, user = await self.client.wait_for('reaction_add', timeout=60.0, check=react_check(self.main_card))
             winner = self.emojis.index(str(reaction.emoji))
             self.players[winner].score += 1
-            await ctx.send(f"Congrats {self.users[winner].name}")
+            await self.ctx.send(f"Congrats {self.users[winner].name}")
         except Exception as e:
             print(e)
             await self.ctx.send("Timed out! No points for anyone!")

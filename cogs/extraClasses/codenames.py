@@ -69,7 +69,7 @@ class Codenames():
 
     async def game_loop(self, team):
         def word_check(m):
-            return (m.content.upper() in self.game_words) or m.content.upper() == "END_TURN" or m.content.upper() == "$STOP"
+            return (m.content.upper() in self.game_words) or m.content.upper() == "END_TURN" or m.content.upper() == "STOP"
 
         if team == "Blue":
             team_num = self.blue_cards
@@ -98,7 +98,10 @@ class Codenames():
                     idenifier = 'Game Over'
                 embed_code.add_field(name=idenifier, value=str_w, inline=True)
 
-            await self.ctx.send(embed=embed_code)
+            if not self.guessed_words:
+                self.game_board = await self.ctx.send(embed=embed_code)
+            else:
+                await self.game_board.edit(embed=embed_code)
 
             try:
                 guess = await self.client.wait_for('message', timeout=120.0, check=word_check)

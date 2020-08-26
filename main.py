@@ -55,6 +55,39 @@ async def on_ready():
 async def kill(ctx):
     await client.logout()
 
+
+@client.command()
+async def tutorial(ctx):
+
+    def react_check(msg):
+        def check(reaction, reacting_user):
+            return reacting_user != client.user and str(reaction.emoji) == '\u23E9' and reaction.message.id == msg.id
+        return check
+
+    buttons = "Lots of commands are run by interacting with 'buttons' like the ones below this message. Wait until all buttons are added to a message before clicking\nWhen ready click on next button"
+    commands = "Commands are called by first typing ! followed by the command.\nA full list of commands can be found by typing !help\nSome commands require extra arguments, don't forget to enclose any text in quotes"
+    games = "Some games require sending you a private message, be sure you check your DMs"
+    stages = [commands, games]
+    titles = ["Commands", "Games"]
+
+    embed_rules = discord.Embed(title="Tutorial", color=0x00ff00)
+    embed_rules.add_field(name='Buttons', value=buttons, inline=False)
+
+    tutEmbed = await ctx.send(embed=embed_rules)
+    await tutEmbed.add_reaction(emoji='\u23E9')
+    for i in range(2):
+        try:
+            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=react_check(tutEmbed))
+            embed_tut = discord.Embed(title="Tutorial", color=0x00ff00)
+            embed_tut.add_field(
+                name=titles[i], value=stages[i], inline=False)
+            await tutEmbed.clear_reaction(emoji='\u23E9')
+            await tutEmbed.add_reaction(emoji='\u23E9')
+            await tutEmbed.edit(embed=embed_tut)
+        except Exception as e:
+            break
+
+
 # @client.command()
 # @commands.check(check_if_it_is_me)
 # async def load(ctx, extension):

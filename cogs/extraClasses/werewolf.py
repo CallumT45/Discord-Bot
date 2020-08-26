@@ -4,16 +4,15 @@ import random
 import asyncio
 
 
-class Player():
-    def __init__(self, name, idn):
-        self.name = name
-        self.id = idn
+# class Player():
+#     def __init__(self, name, idn):
+#         self.name = name
+#         self.id = idn
 
 
 class Werewolf():
     def __init__(self, ctx, client, users):
-        self.users = [Player("Callum", 307625115963621377), Player("Ben", 307625115963621377), Player("Eoin", 307625115963621377), Player(
-            "Jack", 307625115963621377), Player("Jill", 307625115963621377), Player("Claire", 307625115963621377), Player("Jeane", 307625115963621377)]
+        self.users = users
         self.set_roles()
         self.ctx = ctx
         self.client = client

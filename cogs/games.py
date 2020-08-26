@@ -214,7 +214,7 @@ class Games(commands.Cog):
 
         how_to_play2 = """Getting four words with one clue is a big accomplishment. The field operatives must always make at least one guess. 
             Any wrong guess ends the turn immediately, but if the field operatives guess a word of their team's color, they can keep guessing. 
-            You have 120 seconds for each word to guess. To guess a word type it into the chat. Once you have guessed as many words as your spymaster has linked. Your turn is over.
+            \nYou have 120 seconds for each word to guess. To guess a word type it into the chat. Once you have guessed as many words as your spymaster has linked. Your turn is over.
             Type end_turn to finish your turn or stop to end the game. Careful where you pick, choose incorrectly and find the assassin, that's Game Over!"""
 
         embed_rules = discord.Embed(title="Codenames", color=0x00ff00)
@@ -237,17 +237,17 @@ class Games(commands.Cog):
         users = await reaction.users().flatten()
         users = [x for x in users if str(x) != str(self.client.user)]
         if len(users) > 3:
-            CN = Codename(ctx, self.client, users)
+            CN = Codenames(ctx, self.client, users)
             await CN.main()
         else:
             await ctx.send("You need at least 4 to play!")
 
     @commands.command()
-    async def cah(self, ctx, rounds=5):
+    async def cah(self, ctx, score=5):
         """A card game for horrible people
 
         Args:
-            rounds (int, optional): [Set how many round to play]. Defaults to 5.
+            Max_Score (int, optional): [Set when to end the game]. Defaults to 5.
         """
         embed_rules = discord.Embed(
             title="Cards Against Humanity", color=0x00ff00)
@@ -266,7 +266,7 @@ class Games(commands.Cog):
         users = await reaction.users().flatten()
         users = [x for x in users if str(x) != str(self.client.user)]
         if 2 < len(users) < 9:
-            game = CAH(ctx, self.client, rounds, users)
+            game = CAH(ctx, self.client, score, users)
             await game.main()
         else:
             await ctx.send("Game requires 3 to 8 players!")
