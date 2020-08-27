@@ -94,17 +94,23 @@ class Miscellaneous(commands.Cog):
         await ctx.send(json.loads(response.text)["compliment"])
 
     @commands.command()
-    async def calc(self, ctx, *args):
+    async def calc(self, ctx, eq):
         """
             Call this command followed by the equation with no spaces
         """
         try:
-            xn = Expression(*args)
-            await ctx.send(*args)
+            xn = Expression(eq)
+            await ctx.send(eq)
             await ctx.send('= ' + str(xn()))
         except Exception as e:
             # print(e)
             await ctx.send("Invalid Computation")
+
+    @calc.error
+    async def calc_handler(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            if error.param.name == 'eq':
+                await ctx.send("I need the equation to solve the equation")
 
     @commands.command()
     async def xkcd(self, ctx, num=random.randint(1, 2250)):
@@ -164,7 +170,10 @@ class Miscellaneous(commands.Cog):
         """
         Let the bot choose between options, call the command followed by all the options separated by a space.
         """
-        await ctx.send("Trouble choosing? Well I pick: " + random.choice(args))
+        if len(args) > 0:
+            await ctx.send("Trouble choosing? Well I pick: " + random.choice(args))
+        else:
+            await ctx.send("Whoops! Looks like you forgot to give me the options")
 
     @commands.command()
     async def wyr(self, ctx):

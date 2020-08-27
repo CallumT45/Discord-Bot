@@ -26,6 +26,7 @@ class Assignment(commands.Cog):
                 return True
             except:
                 return False
+
         try:
             ID = ctx.guild.id
         except:
@@ -41,7 +42,15 @@ class Assignment(commands.Cog):
         else:
             await ctx.send("Please enter assignment due date in dd/mm/yyyy")
 
-    @commands.command()
+    @new.error
+    async def new_handler(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            if error.param.name == 'date':
+                await ctx.send("You forgot to give me a date")
+            if error.param.name == 'assignment_details':
+                await ctx.send("You forgot to give me the assignment details")
+
+    @ commands.command()
     async def due(self, ctx):
         """Show all the upcoming assignments"""
         def countdown(duedate):
@@ -70,7 +79,7 @@ class Assignment(commands.Cog):
         else:
             await ctx.send("No upcoming assignments")
 
-    @commands.command()
+    @ commands.command()
     async def remove(self, ctx, assignment_details):
         """Removes a assignment from db, call command followed by the exact assignment details in quotes
 
@@ -78,16 +87,19 @@ class Assignment(commands.Cog):
             assignment_details ([String]): [Enclose assignment in quotes]
         """
         try:
-            try:
-                ID = ctx.guild.id
-            except:
-                ID = ctx.author.id
-
-            adb = AssignmentDatabase()
-            adb.remove(assignment_details, ID)
-            await ctx.send("Assignment Removed")
+            ID = ctx.guild.id
         except:
-            await ctx.send("Looks like you forgot to say which assignment to remove!")
+            ID = ctx.author.id
+
+        adb = AssignmentDatabase()
+        adb.remove(assignment_details, ID)
+        await ctx.send("Assignment Removed")
+
+    @remove.error
+    async def remove_handler(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            if error.param.name == 'assignment_details':
+                await ctx.send("Looks like you forgot to say which assignment to remove!")
 
 
 def setup(client):

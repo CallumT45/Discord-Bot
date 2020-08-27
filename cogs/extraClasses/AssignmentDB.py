@@ -41,17 +41,13 @@ class AssignmentDatabase():
                                                  assignment_details, assignments.columns.guild_id == guild_id))
         self.connection.execute(del_st)
 
-    def past_due(self, guild_id):
-        """[Removes all rows where the due date is in the past]
+    def past_due(self):
+        """[Removes all rows where the due date is in the past]"""
 
-        Args:
-            guild_id ([int]): [server identifier]
-        """
         assignments = db.Table('assignments', self.metadata,
                                autoload=True, autoload_with=self.engine)
 
-        del_st = assignments.delete().where(and_(assignments.columns.due_date <
-                                                 date.today(), assignments.columns.guild_id == guild_id))
+        del_st = assignments.delete().where(assignments.columns.due_date < date.today())
         self.connection.execute(del_st)
 
     def create_db(self):

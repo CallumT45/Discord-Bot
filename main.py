@@ -23,7 +23,9 @@ async def deadline():
     while not client.is_closed():
         try:
             adb = AssignmentDatabase()
+            adb.past_due()
             due = adb.check_due()
+
             for row in due:
                 text2 = f'{row[1]} | due on {row[0].strftime("%A")}, {row[0].strftime("%d/%m/%Y")}\n\n'
                 embedDue = discord.Embed(
