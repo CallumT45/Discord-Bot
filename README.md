@@ -2,6 +2,8 @@
 
 MScBot is a bot powered by Python designed for use in my class discord server. MScBot has many features such as assignment tracking, polls, games, coding problems, meme fetching and more!
 
+[<h2>Add to server</h2>](https://discord.com/oauth2/authorize?client_id=667375522073804820&scope=bot&permissions=321600)
+
 **Version 4.0**
 
 - Added Manga to PDF command
