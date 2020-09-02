@@ -67,7 +67,7 @@ async def tutorial(ctx):
         return check
 
     buttons = "Lots of commands are run by interacting with 'buttons' like the ones below this message. Wait until all buttons are added to a message before clicking\nWhen ready click on next button"
-    commands = "Commands are called by first typing ! followed by the command.\nA full list of commands can be found by typing !help\nSome commands require extra arguments, don't forget to enclose any text in quotes"
+    commands = "Commands are called by first typing ! followed by the command.\nA full list of commands can be found by typing !help\nSome commands require extra arguments, don't forget to enclose any text in quotes\nFor Example: !covid 'United States'"
     games = "Some games require sending you a private message, be sure you check your DMs"
     stages = [commands, games]
     titles = ["Commands", "Games"]

@@ -236,7 +236,7 @@ class BlackJack():
                             for j, player2 in enumerate(self.players):
                                 if not player2.out:
                                     embed_players.add_field(
-                                        name=f"{self.users[J].name}", value=player2, inline=True)
+                                        name=f"{self.users[j].name}", value=player2, inline=True)
                                     await self.players_msg.edit(embed=embed_players)
 
                         if player.get_value() > 21:

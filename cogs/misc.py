@@ -40,14 +40,14 @@ class Miscellaneous(commands.Cog):
         plt.style.use('dark_background')
         fig, ax = plt.subplots()
 
-        plt.plot_date(df['date'], df[graph], color='#47a0ff',
-                      linestyle='-', ydate=False, xdate=True)
+        plt.plot_date(list(map(lambda x: x[5:], df['date'])), df[graph], color='#47a0ff',
+                      linestyle='solid', ydate=False, xdate=True, marker='.')
         ax.yaxis.grid()
-        plt.xticks(rotation=65)
+        plt.xticks(rotation=35)
         plt.title(graph)
 
         for i, label in enumerate(ax.xaxis.get_ticklabels()):
-            if i % 5 != 0:
+            if i % ((len(df['date'])//10)+1) != 0:
                 label.set_visible(False)
             else:
                 pass
@@ -133,16 +133,19 @@ class Miscellaneous(commands.Cog):
         """
             Call this command followed by the question, then up to 9 options separated by spaces, use quotes where necessary
         """
-        emojis = ['\u0031\u20E3', '\u0032\u20E3', '\u0033\u20E3', '\u0034\u20E3',
-                  '\u0035\u20E3', '\u0036\u20E3', '\u0037\u20E3', '\u0038\u20E3', '\u0039\u20E3']
-        embed_poll = discord.Embed(title=args[0], color=0x00ff00)
+        if not args:
+            await ctx.send("Example of usage:\n!poll title 'Option 1' 'Option 2' ...")
+        else:
+            emojis = ['\u0031\u20E3', '\u0032\u20E3', '\u0033\u20E3', '\u0034\u20E3',
+                      '\u0035\u20E3', '\u0036\u20E3', '\u0037\u20E3', '\u0038\u20E3', '\u0039\u20E3']
+            embed_poll = discord.Embed(title=args[0], color=0x00ff00)
 
-        for i, value in enumerate(args[1:9]):
-            embed_poll.add_field(name=emojis[i], value=value, inline=True)
-        poll_object = await ctx.send(embed=embed_poll)
+            for i, value in enumerate(args[1:9]):
+                embed_poll.add_field(name=emojis[i], value=value, inline=True)
+            poll_object = await ctx.send(embed=embed_poll)
 
-        for i, answer in enumerate(args[1:9]):
-            await poll_object.add_reaction(emoji=emojis[i])
+            for i, answer in enumerate(args[1:9]):
+                await poll_object.add_reaction(emoji=emojis[i])
 
     @commands.command()
     async def problem(self, ctx):

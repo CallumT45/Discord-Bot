@@ -134,7 +134,7 @@ class Games(commands.Cog):
             name='How to Play?', value='https://www.playwerewolf.co/how-to-play-werewolf-in-75-seconds', inline=False)
         embed_rules.add_field(name='Discord Specific: How to Play?', value='Those with special roles will be dm\'d instructions during the night cycle. Only one werewolf can choose who to kill each night, make sure to discuss it with each other via dm. Lastly when voting for who to lynch during the day, reply to the bot with the number of who you choose to kill. To help with voting make use of the $poll command', inline=False)
         embed_rules.add_field(
-            name='How to Join', value='To play react to this message', inline=False)
+            name='How to Join', value='To play react to this message\nThe game will start 15 seconds after this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
         await msg.add_reaction(emoji='\U00002705')
@@ -182,7 +182,7 @@ class Games(commands.Cog):
         embed_rules.add_field(
             name='How to Play?', value='Type hit for another card, type stand to keep your hand. Bet 0 to walk away!', inline=False)
         embed_rules.add_field(
-            name='How to Join', value='To play react to this message', inline=False)
+            name='How to Join', value='To play react to this message\nThe game will start 15 seconds after this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
         await msg.add_reaction(emoji='\U00002705')
@@ -226,7 +226,7 @@ class Games(commands.Cog):
         embed_rules.add_field(name='How to Play contd',
                               value=how_to_play2, inline=False)
         embed_rules.add_field(
-            name='How to Join', value='To play react to this message', inline=False)
+            name='How to Join', value='To play react to this message\nThe game will start 15 seconds after this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
         await msg.add_reaction(emoji='\U00002705')
@@ -255,11 +255,11 @@ class Games(commands.Cog):
         embed_rules.add_field(name='Description', value="Cards Against Humanity is a party game for horrible people. Unlike most of the party games you've played before, Cards Against Humanity is as despicable and awkward as you and your friends.", inline=False)
         embed_rules.add_field(name='How to Play?', value="The game is simple. Each round, one player asks a question from a black card, and everyone else answers with their funniest white card. To choose a card, click the appropriate emoji. Each round, each player will chose their cards by round robin", inline=False)
         embed_rules.add_field(
-            name='How to Join', value='To play react to this message', inline=False)
+            name='How to Join', value='To play react to this message\nThe game will start 15 seconds after this message', inline=False)
 
         msg = await ctx.send(embed=embed_rules)
         await msg.add_reaction(emoji='\U00002705')
-        await asyncio.sleep(10)
+        await asyncio.sleep(15)
 
         cache_msg = discord.utils.get(self.client.cached_messages, id=msg.id)
         reaction = cache_msg.reactions[0]
