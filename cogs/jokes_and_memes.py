@@ -65,7 +65,7 @@ class Jokes_and_Memes(commands.Cog):
                         await ctx.send(raw_post, file=discord.File(im, "funny_meme.gif"))
 
                     except Exception as e:
-                        print(e)
+                        # print(e)
                         post_to_pick += 1
                         continue
                     break

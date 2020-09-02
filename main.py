@@ -39,7 +39,7 @@ async def deadline():
             # everyday check to see if any assignments are due in 1 day
             await asyncio.sleep(86400)
         except Exception as e:
-            print(e)
+            # print(e)
             await asyncio.sleep(20000)
 
 

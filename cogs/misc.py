@@ -228,7 +228,7 @@ class Miscellaneous(commands.Cog):
                                  save_all=True, append_images=img_list[1:])
                 await ctx.send(file=discord.File("manga.pdf", f"{manga.title()}-Chapter-{str(chapter)}+{part}.pdf"))
         except Exception as e:
-            print(e)
+            # print(e)
             await ctx.send("Error: Please ensure the manga name and chapter number are correct")
 
 

@@ -1,6 +1,6 @@
 # MSc Discord Bot
 
-MScBot is a bot powered by Python designed for use in my class discord server. MScBot has many features such as assignment tracking, polls, games, daily coding problems, meme fetching and more!
+MScBot is a bot powered by Python designed for use in my class discord server. MScBot has many features such as assignment tracking, polls, games, coding problems, meme fetching and more!
 
 **Version 4.0**
 
@@ -35,9 +35,24 @@ MScBot has a lot of features, split into 4 categories. Each commmand is called w
 
 - **Miscellaneous** `!covid` `!insult` `!compliment` `!calc` `!problem` `!poll` `!manga` `!wyr` `!choice` `!tutorial`
 
-There is also a feature to react to a message with ❓, to create a google search link to that message.
+There is also a feature to react to a message with ❓, to create a sarcastic google search link to that message.
 
-## Demo Gif
+## Jokes and Memes Demo
 
-<img src="/files/demo_images/discord.gif" alt="Demo Gif"
+<img src="/files/demo_images/jokes.gif" alt="Joke Demo Gif"
+	title="Demo"/>
+
+## Games Demo
+
+<img src="/files/demo_images/games.gif" alt="Game Demo Gif"
+	title="Demo"/>
+
+## Assignments Demo
+
+<img src="/files/demo_images/assignment.gif" alt="Assignment Demo Gif"
+	title="Demo"/>
+
+## Miscellaneous Demo
+
+<img src="/files/demo_images/misc.gif" alt="Misc Demo Gif"
 	title="Demo"/>
